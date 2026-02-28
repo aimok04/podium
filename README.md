@@ -23,8 +23,9 @@ The app uses **Material 3 Expressive** design to fit right in with modern Androi
 
 ## 📦 Installation
 
-*podium* will be available on **Google Play** and **F-Droid** soon. For now, you can download `.apk`
-binaries [here](github.com/aimok04/podium/releases).
+*podium* will be available on **Google Play** and **F-Droid** soon. For now, you can download `.apk` binaries [here](github.com/aimok04/podium/releases).
+
+[<img src="/images/badge_obtainium.png" alt="Get it on Obtainium" height="80">](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/aimok04/podium)
 
 ## 🖼️ Impressions
 
