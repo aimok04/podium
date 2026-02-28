@@ -1,0 +1,8 @@
+A modern, open-source Podcast app for Android, written in Kotlin using Compose.
+The app uses Material 3 Expressive design to fit right in with modern Android UI.
+
+🚀 Notable Features
+
+-    📥 Download your favorite episodes or enable auto-download to always download new episodes.
+-    Create 📂 lists of podcasts or episodes to keep your library organized.
+-    🔍 Discover new podcasts on the » Discover « tab (powered by Apple Podcasts).
