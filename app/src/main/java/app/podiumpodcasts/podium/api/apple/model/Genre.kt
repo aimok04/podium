@@ -1,0 +1,29 @@
+package app.podiumpodcasts.podium.api.apple.model
+
+enum class Genre(
+    val id: Int
+) {
+    ARTS(1301),
+    BOOKS(1482),
+    BUSINESS(1321),
+    COMEDY(1303),
+    CULTURE(1324),
+    DOCUMENTARY(1543),
+    EDUCATION(1304),
+    FOOD(1306),
+    HEALTH_AND_FITNESS(1512),
+    HISTORY(1487),
+    KIDS_AND_FAMILY(1305),
+    MENTAL_HEALTH(1517),
+    MUSIC(1310),
+    NEWS(1489),
+    PLACES_AND_TRAVEL(1320),
+    RELATIONSHIPS(1544),
+    RELIGION_AND_SPIRITUALITY(1314),
+    SELF_IMPROVEMENT(1500),
+    SCIENCE(1533),
+    SPORTS(1545),
+    TECHNOLOGY(1318),
+    TRUE_CRIME(1488),
+    TV_AND_FILM(1309)
+}
