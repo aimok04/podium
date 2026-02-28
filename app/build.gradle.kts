@@ -8,27 +8,25 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
-val verMajor = 1
-val verMinor = 0
-val verPatch = 0
-val verSuffix: String = "-alpha01"
-
-val verCode = 1000001
-
 android {
     namespace = "app.podiumpodcasts.podium"
     compileSdk {
         version = release(36)
     }
 
+    dependenciesInfo {
+        // Disables dependency metadata when building APKs.
+        includeInApk = false
+        // Disables dependency metadata when building Android App Bundles.
+        includeInBundle = false
+    }
+
     defaultConfig {
         applicationId = "app.podiumpodcasts.podium"
         minSdk = 26
         targetSdk = 36
-        versionCode = verCode
-        versionName = buildString {
-            append("$verMajor.$verMinor.$verPatch$verSuffix")
-        }
+        versionCode = 1000001
+        versionName = "1.0.0-alpha01"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
