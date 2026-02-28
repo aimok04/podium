@@ -10,7 +10,8 @@ The app uses **Material 3 Expressive** design to fit right in with modern Androi
 > Keep in mind that *podium* is work in progress software.
 > It is far from feature complete and can contain bugs.
 
-> [!INFO]
+
+> [!NOTE]
 > *podium* is still lacking some essential features.
 > Please open up a issue if you have any ideas! :)
 
