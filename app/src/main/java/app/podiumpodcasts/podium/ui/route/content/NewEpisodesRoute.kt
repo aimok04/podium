@@ -91,7 +91,7 @@ fun NewEpisodesRoute(
             ) {
                 items(
                     newEpisodes.itemCount,
-                    key = { newEpisodes[it]!!.episode.id }
+                    key = { newEpisodes[it]?.episode?.id ?: -it }
                 ) {
                     val item = newEpisodes[it] ?: return@items
 

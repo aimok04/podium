@@ -207,7 +207,7 @@ private fun SearchContent(
 
                                 items(
                                     count = episodesPager.itemCount,
-                                    key = { episodesPager[it]!!.episode.id }
+                                    key = { episodesPager[it]?.episode?.id ?: -it }
                                 ) { index ->
                                     episodesPager[index]?.let { bundle ->
                                         PodcastEpisodeListItem(

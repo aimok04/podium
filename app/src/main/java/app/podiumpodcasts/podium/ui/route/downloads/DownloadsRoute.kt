@@ -113,7 +113,7 @@ fun DownloadsRoute(
                 items(
                     count = pager.itemCount,
                     key = { index ->
-                        pager[index]!!.download.episodeId
+                        pager[index]?.episode?.id ?: -index
                     }
                 ) {
                     val bundle = pager[it] ?: return@items

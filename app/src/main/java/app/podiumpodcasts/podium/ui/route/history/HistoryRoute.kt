@@ -183,7 +183,7 @@ fun LazyListScope.pagerSection(
 
         items(
             count = pager.itemCount,
-            key = { pager[it]?.history?.id ?: it }
+            key = { pager[it]?.history?.id ?: -it }
         ) {
             val historyElement = pager[it] ?: return@items
 

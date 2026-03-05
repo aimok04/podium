@@ -151,7 +151,7 @@ fun ListRoute(
 
                 items(
                     count = items.itemCount,
-                    key = { items[it]!!.listItem.id }
+                    key = { items[it]?.listItem?.id ?: -it }
                 ) { index ->
                     val item = items[index] ?: return@items
 
