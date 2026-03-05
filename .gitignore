@@ -14,3 +14,14 @@
 .cxx
 local.properties
 .kotlin
+
+/fastlane/Appfile
+/fastlane/.env
+/fastlane/.env.default
+/fastlane/report.xml
+/fastlane/Preview.html
+/fastlane/out
+/fastlane/tmp
+/fastlane/README.md
+
+*.jks
