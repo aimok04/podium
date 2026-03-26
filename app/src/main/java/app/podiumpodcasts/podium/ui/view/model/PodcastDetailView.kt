@@ -102,6 +102,7 @@ import app.podiumpodcasts.podium.ui.formatFileSize
 import app.podiumpodcasts.podium.ui.helper.LocalDatabase
 import app.podiumpodcasts.podium.ui.theme.Typography
 import app.podiumpodcasts.podium.ui.vm.PodcastDetailViewModel
+import coil3.compose.AsyncImagePainter
 import com.materialkolor.ktx.harmonizeWithPrimary
 import dev.chrisbanes.haze.hazeEffect
 
@@ -212,6 +213,15 @@ fun PodcastDetailView(
 
                                 model = podcast.imageUrl,
                                 contentDescription = null,
+
+                                onState = {
+                                    // attempt to recalculate image seed color when = 0
+                                    if(podcast.imageSeedColor != 0) return@ShimmerAsyncImage
+
+                                    if(it is AsyncImagePainter.State.Success) {
+                                        vm.updateImageSeedColor(db, activity, podcast.origin, it.result.image)
+                                    }
+                                },
 
                                 contentScale = ContentScale.Crop
                             )

@@ -5,12 +5,19 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.toArgb
+import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.podiumpodcasts.podium.api.db.AppDatabase
 import app.podiumpodcasts.podium.api.db.model.PodcastModel
 import app.podiumpodcasts.podium.background.work.SingularPodcastUpdateWork
 import app.podiumpodcasts.podium.ui.view.model.Destinations
+import coil3.Image
+import coil3.asDrawable
+import com.materialkolor.ktx.themeColorOrNull
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class PodcastDetailViewModel : ViewModel() {
@@ -104,6 +111,20 @@ class PodcastDetailViewModel : ViewModel() {
     ) {
         viewModelScope.launch {
             db.podcasts().delete(podcast)
+        }
+    }
+
+    fun updateImageSeedColor(
+        db: AppDatabase,
+        context: Context,
+        origin: String,
+        image: Image
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val themeColor = image.asDrawable(context.resources)
+                .toBitmap().asImageBitmap().themeColorOrNull()
+
+            db.podcasts().updateImageSeedColor(origin, themeColor?.toArgb() ?: -1)
         }
     }
 
