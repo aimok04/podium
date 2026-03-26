@@ -117,17 +117,17 @@ class PlaybackService : MediaSessionService() {
     fun buildMediaButtons(): List<CommandButton> {
         val seekBack = CommandButton.Builder(CommandButton.ICON_SKIP_BACK_10)
             .setPlayerCommand(Player.COMMAND_SEEK_BACK)
-            .setDisplayName("Rewind")
+            .setDisplayName(getString(R.string.common_action_seek_back))
             .build()
 
         val seekForward = CommandButton.Builder(CommandButton.ICON_SKIP_FORWARD_30)
             .setPlayerCommand(Player.COMMAND_SEEK_FORWARD)
-            .setDisplayName("Skip")
+            .setDisplayName(getString(R.string.common_action_seek_forward))
             .build()
 
         val playbackSpeed = CommandButton.Builder(CommandButton.ICON_PLAYBACK_SPEED)
             .setSessionCommand(SessionCommand(COMMAND_CYCLE_SPEED, Bundle.EMPTY))
-            .setDisplayName("Playback Speed")
+            .setDisplayName(getString(R.string.common_action_toggle_playback_speed))
             .build()
 
         return listOf(

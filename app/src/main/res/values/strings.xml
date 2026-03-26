@@ -26,10 +26,13 @@
     <string name="common_action_remove_from_queue">Remove from queue</string>
     <string name="common_action_save">Save</string>
     <string name="common_action_seek_back">Seek back</string>
+    <string name="common_action_seek_back">Seek back</string>
+    <string name="common_action_seek_forward">Seek forward</string>
     <string name="common_action_seek_forwards">Seek forwards</string>
     <string name="common_action_select_country_code">Select country code</string>
     <string name="common_action_select_file">Select file</string>
     <string name="common_action_subscribe">Subscribe</string>
+    <string name="common_action_toggle_playback_speed">Toggle playback speed</string>
     <string name="common_action_unsubscribe">Unsubscribe</string>
     <string name="common_action_wait">Wait</string>
     <string name="common_action_yes">Yes</string>
