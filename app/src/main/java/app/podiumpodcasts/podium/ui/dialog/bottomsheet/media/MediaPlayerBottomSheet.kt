@@ -426,7 +426,7 @@ fun MediaPlayerBottomSheet(
                                             30000L -> Icons.Rounded.Forward30
                                             else -> Icons.Rounded.Forward
                                         },
-                                        contentDescription = stringResource(R.string.common_action_seek_forwards),
+                                        contentDescription = stringResource(R.string.common_action_seek_forward),
                                         modifier = Modifier.size(IconButtonDefaults.largeIconSize),
                                     )
                                 }
