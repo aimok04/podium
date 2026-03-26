@@ -50,6 +50,9 @@ android {
 
             signingConfig = signingConfigs["release"]
         }
+        debug {
+            applicationIdSuffix = ".debug"
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
