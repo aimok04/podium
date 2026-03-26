@@ -1,5 +1,7 @@
 Hey 👋
 
-This release fixes crashes in some sub routes:
+This release adds some new functionality and design improvements:
 
-- fix(ui): removed non-null assertions from lazy list keys
+— Added `.opml` export and import functionality
+— Improved headings on podcast and episode detail pages
+— Made seek back and forward increments customizable
