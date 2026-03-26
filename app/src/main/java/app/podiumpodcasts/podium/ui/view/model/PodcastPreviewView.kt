@@ -1,7 +1,5 @@
 package app.podiumpodcasts.podium.ui.view.model
 
-import android.util.Log
-import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -14,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
@@ -53,15 +52,16 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import app.podiumpodcasts.podium.AppActivity
+import androidx.compose.ui.unit.sp
 import app.podiumpodcasts.podium.R
 import app.podiumpodcasts.podium.api.db.model.PodcastModel
 import app.podiumpodcasts.podium.api.model.PodcastPreviewModel
 import app.podiumpodcasts.podium.ui.component.DetailsList
 import app.podiumpodcasts.podium.ui.component.DetailsListItemModel
 import app.podiumpodcasts.podium.ui.component.common.BackButton
+import app.podiumpodcasts.podium.ui.component.common.ExpandableText
 import app.podiumpodcasts.podium.ui.component.layout.ErrorLayout
 import app.podiumpodcasts.podium.ui.component.layout.LoadingLayout
 import app.podiumpodcasts.podium.ui.component.layout.StateIconLayout
@@ -159,7 +159,8 @@ fun PodcastPreviewView(
                                 )
 
                                 LazyColumn(
-                                    state = vm.listState
+                                    state = vm.listState,
+                                    overscrollEffect = null
                                 ) {
                                     item(
                                         key = "BACKDROP"
@@ -216,9 +217,17 @@ fun PodcastPreviewView(
                                                         .padding(start = 16.dp, end = 16.dp)
                                                 ) {
                                                     Column {
-                                                        Text(
+                                                        ExpandableText(
                                                             text = podcast.title,
-                                                            style = Typography.displaySmallEmphasized
+                                                            autoSize = TextAutoSize.StepBased(
+                                                                minFontSize = 24.sp,
+                                                                maxFontSize = 40.sp
+                                                            ),
+                                                            minAutoSize = 24.sp,
+                                                            maxLines = 3,
+                                                            style = Typography.displayMediumEmphasized.copy(
+                                                                lineHeight = TextUnit.Unspecified
+                                                            )
                                                         )
 
                                                         Spacer(Modifier.height(4.dp))

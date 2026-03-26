@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -63,13 +64,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.podiumpodcasts.podium.R
 import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeBundle
 import app.podiumpodcasts.podium.api.db.model.PodcastModel
 import app.podiumpodcasts.podium.ui.component.DetailsList
 import app.podiumpodcasts.podium.ui.component.DetailsListItemModel
 import app.podiumpodcasts.podium.ui.component.common.BackButton
+import app.podiumpodcasts.podium.ui.component.common.ExpandableText
 import app.podiumpodcasts.podium.ui.component.media.FloatingMediaPlayerSpacer
 import app.podiumpodcasts.podium.ui.component.model.ContentFavoriteButton
 import app.podiumpodcasts.podium.ui.component.model.ContentSaveToListButton
@@ -198,9 +202,18 @@ fun PodcastEpisodeDetailView(
                                 .padding(start = 16.dp, end = 16.dp)
                         ) {
                             Column {
-                                Text(
+                                ExpandableText(
                                     text = episode.title,
-                                    style = Typography.headlineLargeEmphasized
+                                    autoSize = TextAutoSize.StepBased(
+                                        minFontSize = 24.sp,
+                                        maxFontSize = 32.sp
+                                    ),
+                                    minAutoSize = 24.sp,
+                                    maxLines = 5,
+                                    overflow = TextOverflow.Ellipsis,
+                                    style = Typography.headlineLargeEmphasized.copy(
+                                        lineHeight = TextUnit.Unspecified
+                                    )
                                 )
 
                                 Spacer(Modifier.height(4.dp))

@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.QueueMusic
@@ -73,7 +74,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.podiumpodcasts.podium.AppActivity
 import app.podiumpodcasts.podium.R
@@ -85,6 +88,7 @@ import app.podiumpodcasts.podium.ui.component.DetailsListItemModel
 import app.podiumpodcasts.podium.ui.component.common.BackButton
 import app.podiumpodcasts.podium.ui.component.common.BubbleButton
 import app.podiumpodcasts.podium.ui.component.common.ButtonLabelWithIconInset
+import app.podiumpodcasts.podium.ui.component.common.ExpandableText
 import app.podiumpodcasts.podium.ui.component.common.swipeable.SwipeableItem
 import app.podiumpodcasts.podium.ui.component.common.swipeable.SwipeableItemActions
 import app.podiumpodcasts.podium.ui.component.media.FloatingMediaPlayerSpacer
@@ -229,9 +233,17 @@ fun PodcastDetailView(
                                         .padding(start = 16.dp, end = 16.dp)
                                 ) {
                                     Column {
-                                        Text(
+                                        ExpandableText(
                                             text = podcast.fetchTitle(),
-                                            style = Typography.displaySmallEmphasized
+                                            autoSize = TextAutoSize.StepBased(
+                                                minFontSize = 24.sp,
+                                                maxFontSize = 40.sp
+                                            ),
+                                            minAutoSize = 24.sp,
+                                            maxLines = 3,
+                                            style = Typography.displayMediumEmphasized.copy(
+                                                lineHeight = TextUnit.Unspecified
+                                            )
                                         )
 
                                         Spacer(Modifier.height(4.dp))

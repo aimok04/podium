@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
@@ -65,7 +66,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.podiumpodcasts.podium.R
 import app.podiumpodcasts.podium.ui.component.common.SwitchableDynamicMaterialExpressiveTheme
@@ -150,7 +153,10 @@ fun MediaPlayerBottomSheet(
             Column(
                 Modifier
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(
+                        state = rememberScrollState(),
+                        flingBehavior = null
+                    )
             ) {
                 Column(
                     Modifier.padding(16.dp),
@@ -255,9 +261,15 @@ fun MediaPlayerBottomSheet(
                                 ) {
                                     Text(
                                         text = mediaMetadata?.title.toString(),
+                                        autoSize = TextAutoSize.StepBased(
+                                            minFontSize = 24.sp,
+                                            maxFontSize = 36.sp
+                                        ),
                                         maxLines = 2,
                                         overflow = TextOverflow.Ellipsis,
-                                        style = Typography.displaySmallEmphasized
+                                        style = Typography.displaySmallEmphasized.copy(
+                                            lineHeight = TextUnit.Unspecified
+                                        )
                                     )
 
                                     Text(
