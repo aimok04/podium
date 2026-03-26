@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+    <string name="app_name">podium</string>
+    <string name="app_name_alternative">Podcasts</string>
+
+    <string name="badge_powered_by_apple_podcasts">Bereitgestellt von Apple Podcasts</string>
+    <string name="badge_powered_by_apple_podcasts_text">%1$s verwendet mehrere Apple-APIs, die die Entdecken- und Suchfunktionen ermöglichen.\n\nDu kannst die Nutzung der Apple-APIs in den Einstellungen deaktivieren.</string>
+
+    <string name="common_action_abort">Abbrechen</string>
+    <string name="common_action_add">Hinzufügen</string>
+    <string name="common_action_add_to_favorites">Zu Favoriten hinzufügen</string>
+    <string name="common_action_add_to_queue">Zur Warteschlange hinzufügen</string>
+    <string name="common_action_back">Zurück</string>
+    <string name="common_action_continue">Fortfahren</string>
+    <string name="common_action_create">Erstellen</string>
+    <string name="common_action_delete">Löschen</string>
+    <string name="common_action_disable_auto_download">Auto-Download deaktivieren</string>
+    <string name="common_action_download">Herunterladen</string>
+    <string name="common_action_edit">Bearbeiten</string>
+    <string name="common_action_enable_auto_download">Auto-Download aktivieren</string>
+    <string name="common_action_expand">Erweitern</string>
+    <string name="common_action_mark_as_played">Als gehört markieren</string>
+    <string name="common_action_pause">Pause</string>
+    <string name="common_action_play">Abspielen</string>
+    <string name="common_action_remove_from_favorites">Aus Favoriten entfernen</string>
+    <string name="common_action_remove_from_queue">Aus Warteschlange entfernen</string>
+    <string name="common_action_save">Speichern</string>
+    <string name="common_action_seek_back">Zurückspulen</string>
+    <string name="common_action_seek_forward">Vorspulen</string>
+    <string name="common_action_select_country_code">Ländercode auswählen</string>
+    <string name="common_action_select_file">Datei auswählen</string>
+    <string name="common_action_subscribe">Abonnieren</string>
+    <string name="common_action_toggle_playback_speed">Wiedergabegeschwindigkeit ändern</string>
+    <string name="common_action_unsubscribe">Abbestellen</string>
+    <string name="common_action_wait">Warten</string>
+    <string name="common_action_yes">Ja</string>
+
+    <string name="common_are_you_sure">Bist du sicher?</string>
+    <string name="common_audio_file">Audiodatei</string>
+    <string name="common_author">Autor</string>
+    <string name="common_confirmation">Bestätigung</string>
+    <string name="common_cover_image">Coverbild</string>
+    <string name="common_data_usage_per_update">Datenverbrauch pro Update</string>
+    <string name="common_done">Fertig</string>
+    <string name="common_downloaded">Heruntergeladen</string>
+    <string name="common_downloaded_at">Heruntergeladen</string>
+    <string name="common_downloading">Wird heruntergeladen…</string>
+    <string name="common_duration">Dauer</string>
+    <string name="common_episodes">Episoden</string>
+    <string name="common_guid">ID (GUID)</string>
+    <string name="common_info">Info</string>
+    <string name="common_language_code">Sprachcode</string>
+    <string name="common_new_uppercase">NEU</string>
+    <string name="common_playback_speed">Geschwindigkeit</string>
+    <string name="common_queue">Warteschlange</string>
+    <string name="common_rss_feed">Quelle (RSS-Feed)</string>
+    <string name="common_saved">Gespeichert</string>
+    <string name="common_search">Suche</string>
+    <string name="common_size">Größe</string>
+    <string name="common_sleep_timer">Sleep-Timer</string>
+    <string name="common_sleep_timer_off">Aus</string>
+    <string name="common_source">Quelle</string>
+    <string name="common_state">Status</string>
+    <string name="common_state_played">Gehört</string>
+    <string name="common_streaming">Streaming</string>
+    <string name="common_url">URL</string>
+    <string name="common_waiting">Wartet</string>
+
+    <string name="dialog_artwork_not_analyzed_yet_text">Die Farben des Covers wurden noch nicht analysiert. Wenn du fortfährst, wird das dynamische Farbschema für diesen Podcast nicht angewendet.</string>
+    <string name="dialog_artwork_not_analyzed_yet_title">Coverfarben noch nicht analysiert</string>
+    <string name="dialog_create_new_list_title">Neue Liste erstellen</string>
+    <string name="dialog_delete_confirmation_all_data_will_be_lost">Alle Daten gehen verloren.</string>
+    <string name="dialog_delete_confirmation_podcast">Alle Daten einschließlich Wiedergabestatus, Verlauf und Statistiken gehen verloren.</string>
+    <string name="dialog_delete_confirmation_text">Möchtest du » %1$s « wirklich löschen?</string>
+    <string name="dialog_edit_list_title">Liste bearbeiten</string>
+
+    <string name="form_description">Beschreibung</string>
+    <string name="form_name">Name</string>
+
+    <string name="format_date_days_ago">vor %1$d Tagen</string>
+    <string name="format_date_hours_ago">vor %1$d Stunden</string>
+    <string name="format_date_just_now">gerade eben</string>
+    <string name="format_date_minutes_ago">vor %1$d Minuten</string>
+    <string name="format_date_yesterday">gestern</string>
+    <string name="format_play_time_hours_and_minutes">%1$d Std %2$d Min</string>
+    <string name="format_play_time_left">%1$s verbleibend</string>
+    <string name="format_play_time_minutes">%1$d Min</string>
+
+    <string name="layout_error_title">Ein Fehler ist aufgetreten</string>
+
+    <string name="notifications_new_podcast_episodes_channel_description">Benachrichtigung bei neuen Episoden abonnierter Podcasts</string>
+    <string name="notifications_new_podcast_episodes_channel_name">Neue Podcast-Episoden</string>
+    <string name="notifications_new_podcast_episodes_title">Neue Episode bei » %1$s «</string>
+
+    <string name="route_add_podcast">Podcast hinzufügen</string>
+    <string name="route_continue_playing">Weiterhören</string>
+    <string name="route_continue_playing_empty_text">Aktuell keine angefangenen Episoden. Du hast alles gehört — Zeit für etwas Neues!</string>
+    <string name="route_continue_playing_empty_title">Alles gehört</string>
+    <string name="route_discover">Entdecken</string>
+    <string name="route_discover_search_empty_text">Keine Ergebnisse gefunden. Du kannst Podcasts auch manuell per RSS-Feed hinzufügen.</string>
+    <string name="route_discover_search_empty_title">Keine Treffer</string>
+    <string name="route_discover_search_text">Suchbegriff eingeben und Enter drücken, um zu starten.</string>
+    <string name="route_discover_search_title">Bereit zum Entdecken?</string>
+    <string name="route_downloads">Downloads</string>
+    <string name="route_downloads_empty_text">Hier ist noch nichts! Lade Episoden herunter oder aktiviere Auto-Downloads.</string>
+    <string name="route_downloads_empty_title">Noch nichts vorhanden</string>
+    <string name="route_history">Verlauf</string>
+    <string name="route_history_empty_text">Du hast noch nichts gehört. Wähle einen Podcast aus — dein Verlauf erscheint hier.</string>
+    <string name="route_history_empty_title">Leerer Verlauf</string>
+
+    <string name="route_home">Startseite</string>
+    <string name="route_home_empty_text">Füge Podcasts per RSS hinzu oder entdecke neue im Bereich „Entdecken“.</string>
+    <string name="route_home_empty_title">Deine Bibliothek ist leer</string>
+
+    <string name="route_settings">Einstellungen</string>
+    <string name="route_settings_about">Über</string>
+    <string name="route_settings_appearance">Darstellung</string>
+    <string name="route_settings_player">Player</string>
+    <string name="route_settings_privacy">Datenschutz</string>
+
+    <string name="route_subscriptions">Abonnements</string>
+
+    <string name="system_lists_favorites_label">Favoriten</string>
+    <string name="system_lists_hear_later_label">Später anhören</string>
+
+    <string name="template_elements">%1$d Elemente</string>
+    <string name="template_min">%1$d Min</string>
+    <string name="template_seconds">%1$d Sekunden</string>
+
+    <string name="topic_all">Alle</string>
+    <string name="topic_arts">Kunst</string>
+    <string name="topic_books">Bücher</string>
+    <string name="topic_business">Wirtschaft</string>
+    <string name="topic_comedy">Comedy</string>
+    <string name="topic_culture">Kultur</string>
+    <string name="topic_documentary">Dokumentation</string>
+    <string name="topic_education">Bildung</string>
+    <string name="topic_food">Essen</string>
+    <string name="topic_health_and_fitness">Gesundheit &amp; Fitness</string>
+    <string name="topic_history">Geschichte</string>
+    <string name="topic_kids_and_family">Kinder &amp; Familie</string>
+    <string name="topic_mental_health">Mentale Gesundheit</string>
+    <string name="topic_music">Musik</string>
+    <string name="topic_news">Nachrichten</string>
+    <string name="topic_places_and_travel">Reisen</string>
+    <string name="topic_relationships">Beziehungen</string>
+    <string name="topic_religion_and_spirituality">Religion &amp; Spiritualität</string>
+    <string name="topic_science">Wissenschaft</string>
+    <string name="topic_self_improvement">Selbstverbesserung</string>
+    <string name="topic_sports">Sport</string>
+    <string name="topic_technology">Technologie</string>
+    <string name="topic_true_crime">True Crime</string>
+    <string name="topic_tv_and_film">TV &amp; Film</string>
+</resources>
