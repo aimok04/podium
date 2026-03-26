@@ -28,10 +28,15 @@ import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Forward10
+import androidx.compose.material.icons.rounded.Forward30
+import androidx.compose.material.icons.rounded.Forward5
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Podcasts
+import androidx.compose.material.icons.rounded.Replay
 import androidx.compose.material.icons.rounded.Replay10
+import androidx.compose.material.icons.rounded.Replay30
+import androidx.compose.material.icons.rounded.Replay5
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroup
@@ -72,6 +77,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.podiumpodcasts.podium.R
 import app.podiumpodcasts.podium.ui.component.common.SwitchableDynamicMaterialExpressiveTheme
+import app.podiumpodcasts.podium.ui.custom.icons.Forward
 import app.podiumpodcasts.podium.ui.dialog.ShimmerAsyncImage
 import app.podiumpodcasts.podium.ui.formatPlayerTime
 import app.podiumpodcasts.podium.ui.helper.LocalSettingsRepository
@@ -343,11 +349,16 @@ fun MediaPlayerBottomSheet(
                                         pressedShape = IconButtonDefaults.largePressedShape
                                     ),
                                     onClick = {
-                                        vm.replay10()
+                                        vm.seekBack()
                                     }
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Rounded.Replay10,
+                                        imageVector = when(vm.seekBackIncrement) {
+                                            5000L -> Icons.Rounded.Replay5
+                                            10000L -> Icons.Rounded.Replay10
+                                            30000L -> Icons.Rounded.Replay30
+                                            else -> Icons.Rounded.Replay
+                                        },
                                         contentDescription = stringResource(R.string.common_action_seek_back),
                                         modifier = Modifier.size(IconButtonDefaults.largeIconSize),
                                     )
@@ -405,11 +416,16 @@ fun MediaPlayerBottomSheet(
                                         pressedShape = IconButtonDefaults.largePressedShape
                                     ),
                                     onClick = {
-                                        vm.forward10()
+                                        vm.seekForward()
                                     }
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Rounded.Forward10,
+                                        imageVector = when(vm.seekForwardIncrement) {
+                                            5000L -> Icons.Rounded.Forward5
+                                            10000L -> Icons.Rounded.Forward10
+                                            30000L -> Icons.Rounded.Forward30
+                                            else -> Icons.Rounded.Forward
+                                        },
                                         contentDescription = stringResource(R.string.common_action_seek_forwards),
                                         modifier = Modifier.size(IconButtonDefaults.largeIconSize),
                                     )

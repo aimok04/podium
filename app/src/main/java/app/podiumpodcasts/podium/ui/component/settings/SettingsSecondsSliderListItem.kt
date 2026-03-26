@@ -21,6 +21,7 @@ fun SettingsSecondsSliderListItem(
     value: Int,
     onValueChange: (Int) -> Unit,
 
+    min: Int = 0,
     max: Int = 100,
 
     enabled: Boolean = true,
@@ -54,8 +55,12 @@ fun SettingsSecondsSliderListItem(
                     enabled = enabled,
                     value = state.value,
                     onValueChange = {
+                        val seconds = (max * it)
+                            .roundToInt()
+                            .coerceAtLeast(min)
+
                         state.value = it
-                        onValueChange((max * it).roundToInt())
+                        onValueChange(seconds)
                     },
                     onValueChangeFinished = onValueChangeFinished
                 )

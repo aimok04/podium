@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.KeyEvent
 import androidx.annotation.OptIn
 import androidx.core.content.IntentCompat
@@ -22,6 +21,7 @@ import androidx.media3.session.MediaSessionService
 import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionResult
 import app.podiumpodcasts.podium.R
+import app.podiumpodcasts.podium.SettingsRepository
 import app.podiumpodcasts.podium.background.notification.NewPodcastEpisodeNotification
 import app.podiumpodcasts.podium.manager.DatabaseManager
 import app.podiumpodcasts.podium.ui.DeepLink
@@ -36,17 +36,25 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 const val COMMAND_SLEEP_TIMER_SET = "app.podiumpodcasts.podium.COMMAND_SLEEP_TIMER_SET"
 const val COMMAND_SLEEP_TIMER_GET = "app.podiumpodcasts.podium.COMMAND_SLEEP_TIMER_GET"
 const val COMMAND_CYCLE_SPEED = "app.podiumpodcasts.podium.COMMAND_CYCLE_SPEED"
 
+const val COMMAND_SET_SEEK_BACK_INCREMENT =
+    "app.podiumpodcasts.podium.COMMAND_SET_SEEK_BACK_INCREMENT"
+const val COMMAND_SET_SEEK_FORWARD_INCREMENT =
+    "app.podiumpodcasts.podium.COMMAND_SET_SEEK_FORWARD_INCREMENT"
+
 class PlaybackService : MediaSessionService() {
 
     val db by lazy {
         DatabaseManager.build(this)
     }
+
+    private val settingsRepository = SettingsRepository(this)
 
     private val job = SupervisorJob()
     private val scope = CoroutineScope(job)
@@ -89,9 +97,17 @@ class PlaybackService : MediaSessionService() {
                 }
         )
 
+        val seekBackIncrement = runBlocking {
+            settingsRepository.behavior.playerSeekBackIncrement.first()
+        }
+
+        val seekForwardIncrement = runBlocking {
+            settingsRepository.behavior.playerSeekForwardIncrement.first()
+        }
+
         val player = ExoPlayer.Builder(this)
-            .setSeekBackIncrementMs(10000)
-            .setSeekForwardIncrementMs(30000)
+            .setSeekBackIncrementMs(seekBackIncrement)
+            .setSeekForwardIncrementMs(seekForwardIncrement)
             .setAudioAttributes(
                 AudioAttributes.Builder()
                     .setUsage(C.USAGE_MEDIA)
@@ -103,7 +119,7 @@ class PlaybackService : MediaSessionService() {
             .build()
 
         mediaSession = MediaSession.Builder(this, player)
-            .setMediaButtonPreferences(buildMediaButtons())
+            .setMediaButtonPreferences(buildMediaButtons(player))
             .setSessionActivity(
                 DeepLink.OpenMediaPlayer()
                     .asPendingIntent(this, 42)!!
@@ -114,19 +130,54 @@ class PlaybackService : MediaSessionService() {
         registerPlayStateListener()
     }
 
-    fun buildMediaButtons(): List<CommandButton> {
-        val seekBack = CommandButton.Builder(CommandButton.ICON_SKIP_BACK_10)
+    fun buildMediaButtons(
+        player: ExoPlayer
+    ): List<CommandButton> {
+        val seekBack = CommandButton.Builder(
+            when(player.seekBackIncrement) {
+                5000L -> CommandButton.ICON_SKIP_BACK_5
+                10000L -> CommandButton.ICON_SKIP_FORWARD_10
+                15000L -> CommandButton.ICON_SKIP_FORWARD_15
+                30000L -> CommandButton.ICON_SKIP_FORWARD_30
+                else -> CommandButton.ICON_SKIP_FORWARD
+            }
+        )
             .setPlayerCommand(Player.COMMAND_SEEK_BACK)
+            .setCustomIconResId(
+                when(player.seekBackIncrement) {
+                    5000L -> R.drawable.ic_replay_5
+                    10000L -> R.drawable.ic_replay_10
+                    30000L -> R.drawable.ic_replay_30
+                    else -> R.drawable.ic_replay
+                }
+            )
             .setDisplayName(getString(R.string.common_action_seek_back))
             .build()
 
-        val seekForward = CommandButton.Builder(CommandButton.ICON_SKIP_FORWARD_30)
+        val seekForward = CommandButton.Builder(
+            when(player.seekForwardIncrement) {
+                5000L -> CommandButton.ICON_SKIP_FORWARD_5
+                10000L -> CommandButton.ICON_SKIP_FORWARD_10
+                15000L -> CommandButton.ICON_SKIP_FORWARD_15
+                30000L -> CommandButton.ICON_SKIP_FORWARD_30
+                else -> CommandButton.ICON_SKIP_FORWARD
+            }
+        )
             .setPlayerCommand(Player.COMMAND_SEEK_FORWARD)
+            .setCustomIconResId(
+                when(player.seekForwardIncrement) {
+                    5000L -> R.drawable.ic_forward_5
+                    10000L -> R.drawable.ic_forward_10
+                    30000L -> R.drawable.ic_forward_30
+                    else -> R.drawable.ic_forward
+                }
+            )
             .setDisplayName(getString(R.string.common_action_seek_forward))
             .build()
 
         val playbackSpeed = CommandButton.Builder(CommandButton.ICON_PLAYBACK_SPEED)
             .setSessionCommand(SessionCommand(COMMAND_CYCLE_SPEED, Bundle.EMPTY))
+            .setCustomIconResId(R.drawable.ic_playback_speed)
             .setDisplayName(getString(R.string.common_action_toggle_playback_speed))
             .build()
 
@@ -153,6 +204,8 @@ class PlaybackService : MediaSessionService() {
                 .add(SessionCommand(COMMAND_SLEEP_TIMER_SET, Bundle.EMPTY))
                 .add(SessionCommand(COMMAND_SLEEP_TIMER_GET, Bundle.EMPTY))
                 .add(SessionCommand(COMMAND_CYCLE_SPEED, Bundle.EMPTY))
+                .add(SessionCommand(COMMAND_SET_SEEK_BACK_INCREMENT, Bundle.EMPTY))
+                .add(SessionCommand(COMMAND_SET_SEEK_FORWARD_INCREMENT, Bundle.EMPTY))
                 .build()
             return MediaSession.ConnectionResult.AcceptedResultBuilder(session)
                 .setAvailableSessionCommands(sessionCommands)
@@ -203,6 +256,24 @@ class PlaybackService : MediaSessionService() {
                     session.player.setPlaybackSpeed(nextSpeed)
 
                     return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
+                }
+
+                COMMAND_SET_SEEK_BACK_INCREMENT -> {
+                    val increment = customCommand.customExtras.getLong("increment")
+                    (session.player as? ExoPlayer)?.setSeekBackIncrementMs(increment)
+
+                    return Futures.immediateFuture(
+                        SessionResult(SessionResult.RESULT_SUCCESS)
+                    )
+                }
+
+                COMMAND_SET_SEEK_FORWARD_INCREMENT -> {
+                    val increment = customCommand.customExtras.getLong("increment")
+                    (session.player as? ExoPlayer)?.setSeekForwardIncrementMs(increment)
+
+                    return Futures.immediateFuture(
+                        SessionResult(SessionResult.RESULT_SUCCESS)
+                    )
                 }
 
                 else -> return super.onCustomCommand(session, controller, customCommand, args)

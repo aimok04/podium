@@ -27,6 +27,7 @@ import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material.icons.rounded.Publish
+import androidx.compose.material.icons.rounded.Replay
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material.icons.rounded.SignalCellularAlt
@@ -50,6 +51,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -74,13 +76,16 @@ import app.podiumpodcasts.podium.background.worker.PeriodicPodcastUpdateWorker
 import app.podiumpodcasts.podium.ui.component.common.BackButton
 import app.podiumpodcasts.podium.ui.component.settings.SettingsHeader
 import app.podiumpodcasts.podium.ui.component.settings.SettingsListItem
+import app.podiumpodcasts.podium.ui.component.settings.SettingsSecondsSliderListItem
 import app.podiumpodcasts.podium.ui.component.settings.SettingsSliderListItem
 import app.podiumpodcasts.podium.ui.component.settings.SettingsSwitchListItem
+import app.podiumpodcasts.podium.ui.custom.icons.Forward
 import app.podiumpodcasts.podium.ui.formatFileSize
 import app.podiumpodcasts.podium.ui.helper.LocalDatabase
 import app.podiumpodcasts.podium.ui.helper.LocalSettingsRepository
 import app.podiumpodcasts.podium.ui.vm.DeleteDownloadsAfterValues
 import app.podiumpodcasts.podium.ui.vm.ExportDatabaseState
+import app.podiumpodcasts.podium.ui.vm.MediaPlayerViewModel
 import app.podiumpodcasts.podium.ui.vm.RoamingWarningDialogState
 import app.podiumpodcasts.podium.ui.vm.SettingsViewModel
 import app.podiumpodcasts.podium.ui.vm.UPDATE_PODCASTS_INTERVAL_VALUES
@@ -104,6 +109,7 @@ fun SettingsRoute(
     val uriHandler = LocalUriHandler.current
 
     val vm = viewModel { SettingsViewModel(db, settingsRepository) }
+    val mediaPlayerViewModel = viewModel<MediaPlayerViewModel>()
 
     val updatePodcastsIntervalMinutesState =
         vm.repository.behavior.updatePodcastsIntervalMinutes.collectAsState(60)
@@ -416,6 +422,83 @@ fun SettingsRoute(
                     },
                     label = stringResource(R.string.route_settings_appearance_use_alternative_branding),
                     description = stringResource(R.string.route_settings_appearance_use_alternative_branding_description),
+
+                    index = 1,
+                    count = 2
+                )
+            }
+
+            item {
+                Spacer(Modifier.height(32.dp))
+            }
+
+            item {
+                SettingsHeader(
+                    label = stringResource(R.string.route_settings_player)
+                )
+            }
+
+            item {
+                val increment = vm.repository.behavior.playerSeekBackIncrement.collectAsState(10000)
+
+                val seconds = remember { mutableStateOf(10) }
+                LaunchedEffect(increment.value) { seconds.value = (increment.value / 1000).toInt() }
+
+                SettingsSecondsSliderListItem(
+                    icon = {
+                        Icon(
+                            Icons.Rounded.Replay,
+                            stringResource(R.string.route_settings_player_seek_back_increment)
+                        )
+                    },
+                    label = stringResource(R.string.route_settings_player_seek_back_increment),
+
+                    value = seconds.value,
+                    onValueChange = { seconds.value = it },
+
+                    min = 1,
+                    max = 120,
+
+                    onValueChangeFinished = {
+                        scope.launch {
+                            vm.repository.behavior.setPlayerSeekBackIncrement(seconds.value * 1000L)
+                            mediaPlayerViewModel.updateSeekBackIncrement(seconds.value * 1000L)
+                        }
+                    },
+
+                    index = 0,
+                    count = 2
+                )
+            }
+
+            item {
+                val increment =
+                    vm.repository.behavior.playerSeekForwardIncrement.collectAsState(10000)
+
+                val seconds = remember { mutableStateOf(10) }
+                LaunchedEffect(increment.value) { seconds.value = (increment.value / 1000).toInt() }
+
+                SettingsSecondsSliderListItem(
+                    icon = {
+                        Icon(
+                            Icons.Rounded.Forward,
+                            stringResource(R.string.route_settings_player_seek_forward_increment)
+                        )
+                    },
+                    label = stringResource(R.string.route_settings_player_seek_forward_increment),
+
+                    value = seconds.value,
+                    onValueChange = { seconds.value = it },
+
+                    min = 1,
+                    max = 120,
+
+                    onValueChangeFinished = {
+                        scope.launch {
+                            vm.repository.behavior.setPlayerSeekForwardIncrement(seconds.value * 1000L)
+                            mediaPlayerViewModel.updateSeekForwardIncrement(seconds.value * 1000L)
+                        }
+                    },
 
                     index = 1,
                     count = 2

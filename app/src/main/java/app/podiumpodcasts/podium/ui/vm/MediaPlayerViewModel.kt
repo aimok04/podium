@@ -25,6 +25,8 @@ import androidx.media3.session.SessionResult
 import app.podiumpodcasts.podium.api.db.AppDatabase
 import app.podiumpodcasts.podium.api.db.model.MediaMetadataExtra
 import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeBundle
+import app.podiumpodcasts.podium.background.COMMAND_SET_SEEK_BACK_INCREMENT
+import app.podiumpodcasts.podium.background.COMMAND_SET_SEEK_FORWARD_INCREMENT
 import app.podiumpodcasts.podium.background.COMMAND_SLEEP_TIMER_GET
 import app.podiumpodcasts.podium.background.COMMAND_SLEEP_TIMER_SET
 import app.podiumpodcasts.podium.utils.getEpisodeId
@@ -52,6 +54,9 @@ class MediaPlayerViewModel : ViewModel() {
     var isPlaying by mutableStateOf(false)
     var isLoading by mutableStateOf(false)
     var playbackState by mutableIntStateOf(1)
+
+    var seekBackIncrement by mutableLongStateOf(10000)
+    var seekForwardIncrement by mutableLongStateOf(10000)
 
     var speed by mutableFloatStateOf(1f)
 
@@ -138,12 +143,12 @@ class MediaPlayerViewModel : ViewModel() {
         mediaController?.seekTo(position)
     }
 
-    fun replay10() {
-        mediaController?.seekTo(mediaController!!.currentPosition - 10 * 1000)
+    fun seekBack() {
+        mediaController?.seekBack()
     }
 
-    fun forward10() {
-        mediaController?.seekTo(mediaController!!.currentPosition + 10 * 1000)
+    fun seekForward() {
+        mediaController?.seekForward()
     }
 
     fun setPlaybackSpeed(speed: Float) {
@@ -170,6 +175,28 @@ class MediaPlayerViewModel : ViewModel() {
 
         this.sleepTimerTrigger = result?.extras?.getLong("trigger", 0L)
             .takeIf { it != 0L }
+    }
+
+    fun updateSeekBackIncrement(
+        increment: Long
+    ) {
+        mediaController?.sendCustomCommand(
+            SessionCommand(COMMAND_SET_SEEK_BACK_INCREMENT, Bundle().apply {
+                putLong("increment", increment)
+            }),
+            Bundle()
+        )
+    }
+
+    fun updateSeekForwardIncrement(
+        increment: Long
+    ) {
+        mediaController?.sendCustomCommand(
+            SessionCommand(COMMAND_SET_SEEK_FORWARD_INCREMENT, Bundle().apply {
+                putLong("increment", increment)
+            }),
+            Bundle()
+        )
     }
 
     @Composable
@@ -267,6 +294,16 @@ class MediaPlayerViewModel : ViewModel() {
             super.onIsLoadingChanged(isLoading)
         }
 
+        override fun onSeekBackIncrementChanged(seekBackIncrementMs: Long) {
+            this@MediaPlayerViewModel.seekBackIncrement = seekBackIncrementMs
+            super.onSeekBackIncrementChanged(seekBackIncrementMs)
+        }
+
+        override fun onSeekForwardIncrementChanged(seekForwardIncrementMs: Long) {
+            this@MediaPlayerViewModel.seekForwardIncrement = seekForwardIncrementMs
+            super.onSeekForwardIncrementChanged(seekForwardIncrementMs)
+        }
+
         override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
             this@MediaPlayerViewModel.mediaMetadata = mediaMetadata
             this@MediaPlayerViewModel.metadataOrigin = mediaMetadata.getOrigin()
@@ -300,6 +337,9 @@ class MediaPlayerViewModel : ViewModel() {
         this@MediaPlayerViewModel.currentPosition = mediaController.currentPosition
         this@MediaPlayerViewModel.lastProgressUpdate = System.currentTimeMillis()
 
+        this@MediaPlayerViewModel.seekBackIncrement = mediaController.seekBackIncrement
+        this@MediaPlayerViewModel.seekForwardIncrement = mediaController.seekForwardIncrement
+
         this@MediaPlayerViewModel.speed = mediaController.playbackParameters.speed
 
         this@MediaPlayerViewModel.isLoading = mediaController.isLoading
@@ -331,10 +371,6 @@ class MediaPlayerViewModel : ViewModel() {
 
     fun passDB(db: AppDatabase) {
         this.db = db
-    }
-
-    fun getMediaItem(index: Int): MediaItem? {
-        return mediaController?.getMediaItemAt(index)
     }
 
 }

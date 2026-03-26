@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -20,6 +21,10 @@ object SettingsKeys {
     val APPEARANCE_USE_ALTERNATIVE_BRANDING =
         booleanPreferencesKey("appearance_use_alternative_branding")
 
+    val BEHAVIOR_PLAYER_SEEK_BACK_INCREMENT =
+        longPreferencesKey("behavior_player_seek_back_increment")
+    val BEHAVIOR_PLAYER_SEEK_FORWARD_INCREMENT =
+        longPreferencesKey("behavior_player_seek_forward_increment")
     val BEHAVIOR_UPDATE_PODCASTS_IN_ROAMING =
         booleanPreferencesKey("behavior_update_podcasts_in_roaming")
     val BEHAVIOR_UPDATE_PODCASTS_INTERVAL_MINUTES =
@@ -96,6 +101,24 @@ class SettingsRepository(val context: Context) {
     }
 
     inner class Behavior {
+        val playerSeekBackIncrement: Flow<Long> = dataStore.data
+            .map { preferences ->
+                preferences[SettingsKeys.BEHAVIOR_PLAYER_SEEK_BACK_INCREMENT] ?: 10000
+            }
+
+        suspend fun setPlayerSeekBackIncrement(increment: Long) = dataStore.edit { preferences ->
+            preferences[SettingsKeys.BEHAVIOR_PLAYER_SEEK_BACK_INCREMENT] = increment
+        }
+
+        val playerSeekForwardIncrement: Flow<Long> = dataStore.data
+            .map { preferences ->
+                preferences[SettingsKeys.BEHAVIOR_PLAYER_SEEK_FORWARD_INCREMENT] ?: 10000
+            }
+
+        suspend fun setPlayerSeekForwardIncrement(increment: Long) = dataStore.edit { preferences ->
+            preferences[SettingsKeys.BEHAVIOR_PLAYER_SEEK_FORWARD_INCREMENT] = increment
+        }
+
         val updatePodcastsInRoaming: Flow<Boolean> = dataStore.data
             .map { preferences ->
                 preferences[SettingsKeys.BEHAVIOR_UPDATE_PODCASTS_IN_ROAMING] ?: false

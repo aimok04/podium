@@ -187,6 +187,9 @@
     <string name="route_settings_import_export_export_as_opml_share_title">Save .opml export</string>
     <string name="route_settings_import_export_import_from_opml">Import from .opml</string>
     <string name="route_settings_import_export_import_from_opml_description">Transfer your podcasts from another podcast app</string>
+    <string name="route_settings_player">Player</string>
+    <string name="route_settings_player_seek_back_increment">Seek back increment</string>
+    <string name="route_settings_player_seek_forward_increment">Seek forward increment</string>
     <string name="route_settings_privacy">Privacy</string>
     <string name="route_settings_privacy_disable_apple_podcasts_api">Disable usage of Apple Podcasts API</string>
     <string name="route_settings_privacy_disable_apple_podcasts_api_description">podium will no longer use the Apple Podcasts API if enabled</string>
