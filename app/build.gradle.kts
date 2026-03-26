@@ -141,6 +141,10 @@ dependencies {
 
     implementation(libs.rssparser)
 
+    // XML parsing (opml)
+    implementation(libs.xmlutil.core)
+    implementation(libs.xmlutil.serialization)
+
     // Database
     implementation(libs.room.runtime)
     implementation(libs.room.paging)

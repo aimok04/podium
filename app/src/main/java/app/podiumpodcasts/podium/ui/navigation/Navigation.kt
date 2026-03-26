@@ -21,6 +21,7 @@ import app.podiumpodcasts.podium.ui.route.discover.DiscoverRoute
 import app.podiumpodcasts.podium.ui.route.downloads.DownloadsRoute
 import app.podiumpodcasts.podium.ui.route.history.HistoryRoute
 import app.podiumpodcasts.podium.ui.route.home.HomeRoute
+import app.podiumpodcasts.podium.ui.route.importing.OpmlImportingRoute
 import app.podiumpodcasts.podium.ui.route.library.LibraryRoute
 import app.podiumpodcasts.podium.ui.route.licenses.LicensesRoute
 import app.podiumpodcasts.podium.ui.route.list.ListRoute
@@ -66,6 +67,9 @@ data object Settings : PodiumNavKey(showNavBar = false, showMediaPlayer = false)
 data object Licenses : PodiumNavKey(showNavBar = false, showMediaPlayer = false)
 @Serializable
 data object Restore : PodiumNavKey(showNavBar = false, showMediaPlayer = false)
+
+@Serializable
+data object OpmlImportingRoute : PodiumNavKey(showNavBar = false, showMediaPlayer = false)
 @Serializable
 data object Unknown : PodiumNavKey()
 
@@ -214,6 +218,9 @@ fun Navigation(
                         onRestore = {
                             backStack.clear()
                             backStack.add(Restore)
+                        },
+                        onOpmlImport = {
+                            backStack.add(OpmlImportingRoute)
                         }
                     ) {
                         backStack.removeLastOrNull()
@@ -228,6 +235,12 @@ fun Navigation(
 
                 is Restore -> NavEntry(key) {
                     RestoreRoute()
+                }
+
+                is OpmlImportingRoute -> NavEntry(key) {
+                    OpmlImportingRoute {
+                        backStack.removeLastOrNull()
+                    }
                 }
 
 

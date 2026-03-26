@@ -16,6 +16,7 @@ kotlinxSerializationJson = "1.10.0"
 lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.12.4"
 composeBom = "2026.02.00"
+xmlutil = "1.0.0-rc2"
 
 # Navigation 3
 material = "1.13.0"
@@ -98,6 +99,10 @@ room-paging = { module = "androidx.room:room-paging", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 rssparser = { module = "com.prof18.rssparser:rssparser", version.ref = "rssparser" }
+
+# XML
+xmlutil-core = { module = "io.github.pdvrieze.xmlutil:core-android", version.ref = "xmlutil" }
+xmlutil-serialization = { module = "io.github.pdvrieze.xmlutil:serialization", version.ref = "xmlutil" }
 
 [plugins]
 aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }

@@ -20,11 +20,13 @@ import androidx.compose.material.icons.rounded.CleaningServices
 import androidx.compose.material.icons.rounded.Colorize
 import androidx.compose.material.icons.rounded.DataUsage
 import androidx.compose.material.icons.rounded.DeleteSweep
+import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.ExploreOff
 import androidx.compose.material.icons.rounded.FileDownload
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Public
+import androidx.compose.material.icons.rounded.Publish
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material.icons.rounded.SignalCellularAlt
@@ -90,6 +92,7 @@ import kotlinx.coroutines.launch
 fun SettingsRoute(
     onLicenses: () -> Unit,
     onRestore: () -> Unit,
+    onOpmlImport: () -> Unit,
     onBack: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -298,6 +301,61 @@ fun SettingsRoute(
 
                     onClick = {
                         onRestore()
+                    }
+                )
+            }
+
+            item {
+                Spacer(
+                    Modifier.height(32.dp)
+                )
+            }
+
+            item {
+                SettingsHeader(
+                    label = stringResource(R.string.route_settings_import_export)
+                )
+            }
+
+            item {
+                SettingsListItem(
+                    icon = {
+                        Icon(
+                            Icons.Rounded.Publish,
+                            stringResource(R.string.route_settings_import_export_export_as_opml)
+                        )
+                    },
+                    label = stringResource(R.string.route_settings_import_export_export_as_opml),
+                    description = stringResource(R.string.route_settings_import_export_export_as_opml_description),
+
+                    index = 0,
+                    count = 2,
+
+                    onClick = {
+                        vm.exportAndShareOpml(
+                            context = context,
+                            title = context.getString(R.string.route_settings_import_export_export_as_opml_share_title)
+                        )
+                    }
+                )
+            }
+
+            item {
+                SettingsListItem(
+                    icon = {
+                        Icon(
+                            Icons.Rounded.Download,
+                            stringResource(R.string.route_settings_import_export_import_from_opml)
+                        )
+                    },
+                    label = stringResource(R.string.route_settings_import_export_import_from_opml),
+                    description = stringResource(R.string.route_settings_import_export_import_from_opml_description),
+
+                    index = 1,
+                    count = 2,
+
+                    onClick = {
+                        onOpmlImport()
                     }
                 )
             }

@@ -6,8 +6,6 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeBundle
-import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeModel
 import app.podiumpodcasts.podium.api.db.model.PodcastModel
 import kotlinx.coroutines.flow.Flow
 
@@ -18,6 +16,9 @@ interface PodcastDao {
 
     @Query("SELECT * FROM podcast")
     suspend fun allSync(): List<PodcastModel>
+
+    @Query("SELECT origin FROM podcast")
+    suspend fun allOrigins(): List<String>
 
     @Query("SELECT * FROM podcast WHERE origin=:origin")
     fun get(origin: String): Flow<PodcastModel>
@@ -49,6 +50,9 @@ interface PodcastDao {
 
     @Insert
     suspend fun insertAll(vararg podcasts: PodcastModel)
+
+    @Query("UPDATE podcast SET imageSeedColor=:imageSeedColor WHERE origin=:origin")
+    suspend fun updateImageSeedColor(origin: String, imageSeedColor: Int)
 
     @Update
     suspend fun update(podcast: PodcastModel)

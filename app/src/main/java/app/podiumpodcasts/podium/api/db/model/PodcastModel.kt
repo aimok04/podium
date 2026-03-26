@@ -3,6 +3,7 @@ package app.podiumpodcasts.podium.api.db.model
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import app.podiumpodcasts.podium.api.opml.model.OpmlOutline
 
 @Entity(tableName = "podcast")
 data class PodcastModel(
@@ -34,5 +35,15 @@ data class PodcastModel(
 ) {
     fun fetchTitle(): String {
         return overrideTitle.ifBlank { title }
+    }
+
+    fun toOpmlOutline(): OpmlOutline {
+        return OpmlOutline(
+            title = title,
+            text = title,
+            type = "rss",
+            xmlUrl = origin,
+            htmlUrl = link
+        )
     }
 }

@@ -13,6 +13,8 @@ import app.podiumpodcasts.podium.api.db.AppDatabase
 import app.podiumpodcasts.podium.background.worker.PeriodicPodcastUpdateWorker
 import app.podiumpodcasts.podium.manager.DatabaseManager
 import app.podiumpodcasts.podium.manager.DownloadManager
+import app.podiumpodcasts.podium.manager.ExportManager
+import app.podiumpodcasts.podium.utils.shareFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -114,6 +116,21 @@ class SettingsViewModel(
             DatabaseManager.shareBackupFile(context, file, title)
 
             exportDatabaseState.value = ExportDatabaseState.Idle
+        }
+    }
+
+    fun exportAndShareOpml(
+        context: Context,
+        title: String
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val file = ExportManager(db).exportAsOpml(context)
+            shareFile(
+                context = context,
+                file = file,
+                mimeType = "application/xml",
+                title = title
+            )
         }
     }
 

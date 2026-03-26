@@ -28,6 +28,7 @@
     <string name="common_action_seek_back">Seek back</string>
     <string name="common_action_seek_forwards">Seek forwards</string>
     <string name="common_action_select_country_code">Select country code</string>
+    <string name="common_action_select_file">Select file</string>
     <string name="common_action_subscribe">Subscribe</string>
     <string name="common_action_unsubscribe">Unsubscribe</string>
     <string name="common_action_wait">Wait</string>
@@ -112,6 +113,13 @@
     <string name="route_home">Home</string>
     <string name="route_home_empty_text">Add a podcast via RSS or discover podcasts on the Discover page.</string>
     <string name="route_home_empty_title">Your library is quiet</string>
+    <string name="route_import_invalid_file">Invalid file</string>
+    <string name="route_import_invalid_file_text_opml">Please select a valid .opml file.</string>
+    <string name="route_import_ompl">Import from .opml</string>
+    <string name="route_import_podcast_already_imported">Already imported</string>
+    <string name="route_import_select_backup_file">Select file for import</string>
+    <string name="route_import_select_backup_file_text_opml">Please select a .opml file</string>
+    <string name="route_import_unpacking">Unpacking …</string>
     <string name="route_library">Library</string>
     <string name="route_library_search_empty_text">Nothing in the library matches that name. Try a broader search term.</string>
     <string name="route_library_search_empty_title">No matches in your library</string>
@@ -170,6 +178,12 @@
     <string name="route_settings_downloads_and_storage_delete_played_downloads_description">Automatically delete downloads after playing them to save storage</string>
     <string name="route_settings_downloads_and_storage_include_automatic_downloads">Include automatic downloads</string>
     <string name="route_settings_downloads_and_storage_include_automatic_downloads_description">By default, the settings above only apply for manual downloads. Automatic downloads will be processed on WiFi if disabled</string>
+    <string name="route_settings_import_export">Import &amp; Export</string>
+    <string name="route_settings_import_export_export_as_opml">Export as .opml</string>
+    <string name="route_settings_import_export_export_as_opml_description">Transfer your podcasts to another podcast app</string>
+    <string name="route_settings_import_export_export_as_opml_share_title">Save .opml export</string>
+    <string name="route_settings_import_export_import_from_opml">Import from .opml</string>
+    <string name="route_settings_import_export_import_from_opml_description">Transfer your podcasts from another podcast app</string>
     <string name="route_settings_privacy">Privacy</string>
     <string name="route_settings_privacy_disable_apple_podcasts_api">Disable usage of Apple Podcasts API</string>
     <string name="route_settings_privacy_disable_apple_podcasts_api_description">podium will no longer use the Apple Podcasts API if enabled</string>
