@@ -328,8 +328,8 @@ class MediaLibrarySessionCallback(
 
                     bundle.createMediaItem(service)
                 },
-                1,
-                0L
+                startIndex,
+                startPositionMs
             )
         }
     }
