@@ -1,7 +1,5 @@
 Hey 👋
 
-This release adds some new functionality and design improvements:
-
-— Added `.opml` export and import functionality
-— Improved headings on podcast and episode detail pages
-— Made seek back and forward increments customizable
+- Added support for Android Auto 🚘 (#5).
+- Added saving of selected country on discover tab (#9).
+- Added German 🇩🇪 translation (thanks to @DDOneApps).
