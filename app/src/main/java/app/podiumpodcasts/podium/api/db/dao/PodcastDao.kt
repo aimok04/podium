@@ -14,6 +14,9 @@ interface PodcastDao {
     @Query("SELECT * FROM podcast")
     fun all(): PagingSource<Int, PodcastModel>
 
+    @Query("SELECT * FROM podcast LIMIT :limit OFFSET :offset")
+    suspend fun get(limit: Int, offset: Int): List<PodcastModel>
+
     @Query("SELECT * FROM podcast")
     suspend fun allSync(): List<PodcastModel>
 

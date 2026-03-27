@@ -71,6 +71,8 @@ aboutLibraries {
 }
 
 dependencies {
+    implementation(libs.coroutines.guava)
+    implementation(libs.concurrent.futures)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -155,6 +157,8 @@ dependencies {
 
     // Background tasks
     implementation(libs.androidx.work.runtime.ktx)
+
+    implementation("androidx.concurrent:concurrent-futures-ktx:1.1.0")
 
     implementation(libs.kotlinx.serialization.json)
 

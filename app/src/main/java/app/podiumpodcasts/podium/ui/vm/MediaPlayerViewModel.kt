@@ -100,11 +100,7 @@ class MediaPlayerViewModel : ViewModel() {
         context: Context,
         bundle: PodcastEpisodeBundle
     ) {
-        val mediaItem = bundle.episode
-            .createMediaItem(
-                context = context,
-                resumeAt = bundle.playState?.state?.let { it * 1000L }
-            )
+        val mediaItem = bundle.createMediaItem(context)
 
         mediaController?.addMediaItem(mediaItem)
         syncQueue()

@@ -21,6 +21,9 @@ interface PodcastEpisodePlayStateDao {
     @Query("SELECT * FROM podcastEpisodePlayState, podcastEpisode e WHERE played=0 AND state>0 AND episodeId=e.id ORDER BY pubDate DESC")
     fun allContinuePlaying(): PagingSource<Int, PodcastPlayStateBundle>
 
+    @Query("SELECT * FROM podcastEpisodePlayState, podcastEpisode e WHERE played=0 AND state>0 AND episodeId=e.id ORDER BY pubDate DESC LIMIT :limit OFFSET :offset")
+    suspend fun getContinuePlayingSync(limit: Int, offset: Int): List<PodcastPlayStateBundle>
+
     @Query("SELECT * FROM podcastEpisodePlayState WHERE episodeId=:episodeId")
     suspend fun get(episodeId: String): PodcastEpisodePlayStateModel
 

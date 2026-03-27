@@ -1,12 +1,9 @@
 package app.podiumpodcasts.podium.background
 
-import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.view.KeyEvent
 import androidx.annotation.OptIn
-import androidx.core.content.IntentCompat
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -16,10 +13,9 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.CommandButton
 import androidx.media3.session.DefaultMediaNotificationProvider
+import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
-import androidx.media3.session.MediaSessionService
 import androidx.media3.session.SessionCommand
-import androidx.media3.session.SessionResult
 import app.podiumpodcasts.podium.R
 import app.podiumpodcasts.podium.SettingsRepository
 import app.podiumpodcasts.podium.background.notification.NewPodcastEpisodeNotification
@@ -29,8 +25,6 @@ import app.podiumpodcasts.podium.ui.asPendingIntent
 import app.podiumpodcasts.podium.utils.getEpisodeId
 import app.podiumpodcasts.podium.utils.getOrigin
 import app.podiumpodcasts.podium.utils.getResumeAt
-import com.google.common.util.concurrent.Futures
-import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -48,7 +42,7 @@ const val COMMAND_SET_SEEK_BACK_INCREMENT =
 const val COMMAND_SET_SEEK_FORWARD_INCREMENT =
     "app.podiumpodcasts.podium.COMMAND_SET_SEEK_FORWARD_INCREMENT"
 
-class PlaybackService : MediaSessionService() {
+class PlaybackService : MediaLibraryService() {
 
     val db by lazy {
         DatabaseManager.build(this)
@@ -59,7 +53,7 @@ class PlaybackService : MediaSessionService() {
     private val job = SupervisorJob()
     private val scope = CoroutineScope(job)
 
-    private var mediaSession: MediaSession? = null
+    private var mediaSession: MediaLibrarySession? = null
 
     private var currentSkipEndingValue: Int = 0
 
@@ -78,7 +72,7 @@ class PlaybackService : MediaSessionService() {
     }
 
     private var sleepTimerHandler: Handler = Handler(Looper.getMainLooper())
-    private var sleepTimerTrigger: Long? = null
+    var sleepTimerTrigger: Long? = null
     private var sleepTimerRunnable = Runnable {
         sleepTimerTrigger = null
         mediaSession?.player?.pause()
@@ -118,13 +112,12 @@ class PlaybackService : MediaSessionService() {
             .setHandleAudioBecomingNoisy(true)
             .build()
 
-        mediaSession = MediaSession.Builder(this, player)
+        mediaSession = MediaLibrarySession.Builder(this, player, MediaLibrarySessionCallback(this))
             .setMediaButtonPreferences(buildMediaButtons(player))
             .setSessionActivity(
                 DeepLink.OpenMediaPlayer()
                     .asPendingIntent(this, 42)!!
             )
-            .setCallback(SessionCallback(this))
             .build()
 
         registerPlayStateListener()
@@ -188,148 +181,8 @@ class PlaybackService : MediaSessionService() {
         )
     }
 
-    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {
+    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? {
         return mediaSession
-    }
-
-    @UnstableApi
-    private class SessionCallback(
-        val service: PlaybackService
-    ) : MediaSession.Callback {
-        override fun onConnect(
-            session: MediaSession,
-            controller: MediaSession.ControllerInfo
-        ): MediaSession.ConnectionResult {
-            val sessionCommands = MediaSession.ConnectionResult.DEFAULT_SESSION_COMMANDS.buildUpon()
-                .add(SessionCommand(COMMAND_SLEEP_TIMER_SET, Bundle.EMPTY))
-                .add(SessionCommand(COMMAND_SLEEP_TIMER_GET, Bundle.EMPTY))
-                .add(SessionCommand(COMMAND_CYCLE_SPEED, Bundle.EMPTY))
-                .add(SessionCommand(COMMAND_SET_SEEK_BACK_INCREMENT, Bundle.EMPTY))
-                .add(SessionCommand(COMMAND_SET_SEEK_FORWARD_INCREMENT, Bundle.EMPTY))
-                .build()
-            return MediaSession.ConnectionResult.AcceptedResultBuilder(session)
-                .setAvailableSessionCommands(sessionCommands)
-                .build()
-        }
-
-        override fun onCustomCommand(
-            session: MediaSession,
-            controller: MediaSession.ControllerInfo,
-            customCommand: SessionCommand,
-            args: Bundle
-        ): ListenableFuture<SessionResult> {
-            when(customCommand.customAction) {
-
-                COMMAND_SLEEP_TIMER_SET -> {
-                    val trigger = customCommand.customExtras.getLong("trigger")
-
-                    if(trigger != 0L) {
-                        service.startSleepTimer(
-                            trigger = trigger
-                        )
-                    } else {
-                        service.stopSleepTimer()
-                    }
-
-                    return Futures.immediateFuture(
-                        SessionResult(SessionResult.RESULT_SUCCESS)
-                    )
-                }
-
-                COMMAND_SLEEP_TIMER_GET -> {
-                    val extras = Bundle().apply {
-                        putLong("trigger", service.sleepTimerTrigger ?: 0L)
-                    }
-
-                    return Futures.immediateFuture(
-                        SessionResult(SessionResult.RESULT_SUCCESS, extras)
-                    )
-                }
-
-                COMMAND_CYCLE_SPEED -> {
-                    val currentSpeed = session.player.playbackParameters.speed
-                    val nextSpeed = when {
-                        currentSpeed < 1.5f -> 1.5f
-                        currentSpeed < 2.0f -> 2.0f
-                        else -> 1.0f
-                    }
-                    session.player.setPlaybackSpeed(nextSpeed)
-
-                    return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
-                }
-
-                COMMAND_SET_SEEK_BACK_INCREMENT -> {
-                    val increment = customCommand.customExtras.getLong("increment")
-                    (session.player as? ExoPlayer)?.setSeekBackIncrementMs(increment)
-
-                    return Futures.immediateFuture(
-                        SessionResult(SessionResult.RESULT_SUCCESS)
-                    )
-                }
-
-                COMMAND_SET_SEEK_FORWARD_INCREMENT -> {
-                    val increment = customCommand.customExtras.getLong("increment")
-                    (session.player as? ExoPlayer)?.setSeekForwardIncrementMs(increment)
-
-                    return Futures.immediateFuture(
-                        SessionResult(SessionResult.RESULT_SUCCESS)
-                    )
-                }
-
-                else -> return super.onCustomCommand(session, controller, customCommand, args)
-
-            }
-        }
-
-        /**
-         * Remap skip backward and skip forward to seek back and seek forward
-         * To allow seeking using headphone buttons for example
-         */
-        override fun onMediaButtonEvent(
-            session: MediaSession,
-            controllerInfo: MediaSession.ControllerInfo,
-            intent: Intent
-        ): Boolean {
-            IntentCompat.getParcelableExtra(intent, Intent.EXTRA_KEY_EVENT, KeyEvent::class.java)
-                ?.let { keyEvent ->
-                    if(keyEvent.action != KeyEvent.ACTION_UP) return@let
-
-                    when(keyEvent.keyCode) {
-                        KeyEvent.KEYCODE_MEDIA_SKIP_BACKWARD,
-                        KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
-                            return true
-                        }
-
-                        KeyEvent.KEYCODE_MEDIA_SKIP_FORWARD,
-                        KeyEvent.KEYCODE_MEDIA_NEXT -> {
-                            session.player.seekForward()
-                            return true
-                        }
-                    }
-                }
-
-            return super.onMediaButtonEvent(session, controllerInfo, intent)
-        }
-
-        /**
-         * Remap COMMAND_SEEK_TO_PREVIOUS and COMMAND_SEEK_TO_NEXT to seek back and seek forward
-         * To allow seeking using headphone buttons for example
-         */
-        override fun onPlayerCommandRequest(
-            session: MediaSession,
-            controller: MediaSession.ControllerInfo,
-            playerCommand: Int
-        ): Int {
-            if(playerCommand == Player.COMMAND_SEEK_TO_PREVIOUS) {
-                session.player.seekBack()
-                return SessionResult.RESULT_INFO_SKIPPED
-            } else if(playerCommand == Player.COMMAND_SEEK_TO_NEXT) {
-                session.player.seekForward()
-                return SessionResult.RESULT_INFO_SKIPPED
-            }
-
-            return super.onPlayerCommandRequest(session, controller, playerCommand)
-        }
     }
 
     private fun enqueueUpdatePlayState() {
@@ -473,12 +326,12 @@ class PlaybackService : MediaSessionService() {
         })
     }
 
-    private fun stopSleepTimer() {
+    fun stopSleepTimer() {
         sleepTimerTrigger = null
         sleepTimerRunnable.let { sleepTimerHandler.removeCallbacks(it) }
     }
 
-    private fun startSleepTimer(trigger: Long) {
+    fun startSleepTimer(trigger: Long) {
         sleepTimerTrigger = trigger
 
         val delay = trigger - System.currentTimeMillis()

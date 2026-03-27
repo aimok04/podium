@@ -20,9 +20,15 @@ interface PodcastEpisodeDao {
     @Query("SELECT * FROM podcastEpisode WHERE origin=:origin ORDER BY pubDate DESC")
     suspend fun allSync(origin: String): List<PodcastEpisodeBundle>
 
+    @Query("SELECT * FROM podcastEpisode WHERE origin=:origin ORDER BY pubDate DESC LIMIT :limit OFFSET :offset")
+    suspend fun get(origin: String, limit: Int, offset: Int): List<PodcastEpisodeBundle>
+
     @Transaction
     @Query("SELECT * FROM podcastEpisode WHERE new=1 ORDER BY pubDate DESC")
     fun allNew(): PagingSource<Int, PodcastEpisodeBundle>
+
+    @Query("SELECT * FROM podcastEpisode WHERE new=1 ORDER BY pubDate DESC LIMIT :limit OFFSET :offset")
+    fun getNew(limit: Int, offset: Int): List<PodcastEpisodeBundle>
 
     @Query("SELECT id FROM podcastEpisode WHERE origin=:origin")
     suspend fun getEpisodeIds(origin: String): List<String>

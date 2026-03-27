@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import androidx.media3.session.legacy.MediaDescriptionCompat
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
@@ -67,16 +68,44 @@ data class PodcastEpisodeModel(
 ) {
     fun createMediaItem(
         context: Context,
-        resumeAt: Long? = null
+        playState: PodcastEpisodePlayStateModel? = null
     ): MediaItem {
         val downloadFile = craftDownloadFile(context)
+        val isDownload = downloadFile.exists()
 
         return MediaItem.Builder()
+            .setMediaId("episode:$id")
             .setMediaMetadata(
-                createMediaMetadata(
-                    resumeAt = resumeAt,
-                    isDownload = downloadFile.exists()
-                )
+                MediaMetadata.Builder()
+                    .setTitle(title)
+                    .setDescription(description)
+                    .setArtist(podcastTitle)
+                    .setSubtitle(podcastTitle)
+                    .setDisplayTitle(title)
+                    .setArtworkUri((imageUrl ?: "").toUri())
+                    .setExtras(
+                        Bundle().apply {
+                            putString(MediaMetadataExtra.ORIGIN.name, origin)
+                            putString(MediaMetadataExtra.EPISODE_ID.name, id)
+                            putInt(MediaMetadataExtra.IMAGE_SEED_COLOR.name, imageSeedColor)
+                            putBoolean(MediaMetadataExtra.IS_DOWNLOAD.name, isDownload)
+                            if(playState != null) putLong(
+                                MediaMetadataExtra.RESUME_AT.name,
+                                playState.state * 1000L
+                            )
+
+                            putLong(
+                                MediaDescriptionCompat.EXTRA_DOWNLOAD_STATUS, when(isDownload) {
+                                    true -> MediaDescriptionCompat.STATUS_DOWNLOADED
+                                    false -> MediaDescriptionCompat.STATUS_NOT_DOWNLOADED
+                                }
+                            )
+                        }
+                    )
+                    .setMediaType(MediaMetadata.MEDIA_TYPE_PODCAST_EPISODE)
+                    .setIsBrowsable(false)
+                    .setIsPlayable(true)
+                    .build()
             )
             .setUri(
                 when(downloadFile.exists()) {
@@ -84,29 +113,6 @@ data class PodcastEpisodeModel(
                     false -> Uri.parse(audioUrl)
                 }
             ).build()
-    }
-
-    fun createMediaMetadata(
-        resumeAt: Long? = null,
-        isDownload: Boolean
-    ): MediaMetadata {
-        return MediaMetadata.Builder()
-            .setTitle(title)
-            .setDescription(description)
-            .setArtist(podcastTitle)
-            .setSubtitle(podcastTitle)
-            .setDisplayTitle(title)
-            .setArtworkUri((imageUrl ?: "").toUri())
-            .setExtras(
-                Bundle().apply {
-                    putString(MediaMetadataExtra.ORIGIN.name, origin)
-                    putString(MediaMetadataExtra.EPISODE_ID.name, id)
-                    putInt(MediaMetadataExtra.IMAGE_SEED_COLOR.name, imageSeedColor)
-                    putBoolean(MediaMetadataExtra.IS_DOWNLOAD.name, isDownload)
-                    if(resumeAt != null) putLong(MediaMetadataExtra.RESUME_AT.name, resumeAt)
-                }
-            )
-            .build()
     }
 
     fun craftDownloadFile(
