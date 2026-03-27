@@ -26,6 +26,8 @@ import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,7 +45,6 @@ import app.podiumpodcasts.podium.ui.component.media.LocalFloatingMediaPlayerHeig
 import app.podiumpodcasts.podium.ui.component.model.PodcastPreviewCard
 import app.podiumpodcasts.podium.ui.dialog.CountryCodeSelectorDialog
 import app.podiumpodcasts.podium.ui.dialog.bottomsheet.PodcastPreviewBottomSheet
-import app.podiumpodcasts.podium.ui.helper.LocalDatabase
 import app.podiumpodcasts.podium.ui.helper.LocalSettingsRepository
 import app.podiumpodcasts.podium.ui.vm.discover.DiscoverViewModel
 import app.podiumpodcasts.podium.ui.vm.discover.State
@@ -59,7 +60,6 @@ fun DiscoverRoute(
     val scope = rememberCoroutineScope()
 
     val context = LocalContext.current
-    LocalDatabase.current
 
     val settingsRepository = LocalSettingsRepository.current
     val disableApplePodcastsApi = settingsRepository.privacy.disableApplePodcastsApi
@@ -70,16 +70,22 @@ fun DiscoverRoute(
         return
     }
 
-    val vm = viewModel { DiscoverViewModel(getCountryCode(context)) }
+    val defaultCountryCode = remember { getCountryCode(context) }
+    val discoverCountryCode = settingsRepository.behavior.getDiscoverCountryCode(defaultCountryCode)
+        .collectAsState(defaultCountryCode)
+
+    val vm = viewModel<DiscoverViewModel>()
 
     val textFieldState = rememberTextFieldState()
     val searchBarState = rememberSearchBarState()
 
     val pagerState = rememberPagerState { Topics.entries.size }
 
-    LaunchedEffect(vm.countryCodeSelectorState.value) {
+    val showCountryCodeSelector = remember { mutableStateOf(false) }
+
+    LaunchedEffect(discoverCountryCode.value) {
         vm.updateCountryCode(
-            countryCode = vm.countryCodeSelectorState.value,
+            countryCode = discoverCountryCode.value,
             currentPage = pagerState.currentPage
         )
     }
@@ -87,14 +93,14 @@ fun DiscoverRoute(
     Scaffold(
         topBar = {
             DiscoverSearch(
-                countryCode = vm.countryCode.value,
+                countryCode = discoverCountryCode.value,
 
                 textFieldState = textFieldState,
                 searchBarState = searchBarState,
                 actions = {
                     IconButton(
                         onClick = {
-                            vm.countryCodeSelectorState.show()
+                            showCountryCodeSelector.value = true
                         }
                     ) {
                         Icon(
@@ -149,6 +155,7 @@ fun DiscoverRoute(
                     ) {
                         LaunchedEffect(index) {
                             vm.updatePage(
+                                countryCode = discoverCountryCode.value,
                                 index = index
                             )
                         }
@@ -218,12 +225,15 @@ fun DiscoverRoute(
         }
     )
 
-    CountryCodeSelectorDialog(
-        state = vm.countryCodeSelectorState,
-        onUpdate = {
-            vm.updatePage(
-                index = pagerState.currentPage
-            )
+    if(showCountryCodeSelector.value) CountryCodeSelectorDialog(
+        value = discoverCountryCode.value,
+        onValueChange = {
+            scope.launch {
+                settingsRepository.behavior.setDiscoverCountryCode(it)
+            }
+        },
+        onDismiss = {
+            showCountryCodeSelector.value = false
         }
     )
 }

@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -21,6 +22,8 @@ object SettingsKeys {
     val APPEARANCE_USE_ALTERNATIVE_BRANDING =
         booleanPreferencesKey("appearance_use_alternative_branding")
 
+    val BEHAVIOR_DISCOVER_COUNTRY_CODE =
+        stringPreferencesKey("behavior_discover_country_code")
     val BEHAVIOR_PLAYER_SEEK_BACK_INCREMENT =
         longPreferencesKey("behavior_player_seek_back_increment")
     val BEHAVIOR_PLAYER_SEEK_FORWARD_INCREMENT =
@@ -101,6 +104,17 @@ class SettingsRepository(val context: Context) {
     }
 
     inner class Behavior {
+        fun getDiscoverCountryCode(default: String): Flow<String> {
+            return dataStore.data.map { preferences ->
+                preferences[SettingsKeys.BEHAVIOR_DISCOVER_COUNTRY_CODE]
+                    ?: default
+            }
+        }
+
+        suspend fun setDiscoverCountryCode(cc: String) = dataStore.edit { preferences ->
+            preferences[SettingsKeys.BEHAVIOR_DISCOVER_COUNTRY_CODE] = cc
+        }
+
         val playerSeekBackIncrement: Flow<Long> = dataStore.data
             .map { preferences ->
                 preferences[SettingsKeys.BEHAVIOR_PLAYER_SEEK_BACK_INCREMENT] ?: 10000

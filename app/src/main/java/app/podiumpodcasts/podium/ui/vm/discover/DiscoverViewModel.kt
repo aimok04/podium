@@ -2,14 +2,12 @@ package app.podiumpodcasts.podium.ui.vm.discover
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.podiumpodcasts.podium.R
 import app.podiumpodcasts.podium.api.apple.ApplePodcastClient
 import app.podiumpodcasts.podium.api.apple.model.Genre
 import app.podiumpodcasts.podium.api.model.PodcastPreviewModel
-import app.podiumpodcasts.podium.ui.dialog.CountryCodeSelectorState
 import app.podiumpodcasts.podium.ui.dialog.bottomsheet.PodcastPreviewBottomSheetState
 import kotlinx.coroutines.launch
 
@@ -56,18 +54,12 @@ interface State {
     data class Error(val error: String) : State
 }
 
-class DiscoverViewModel(
-    val defaultCountryCode: String
-) : ViewModel() {
+class DiscoverViewModel : ViewModel() {
 
     val applePodcastClient = ApplePodcastClient()
 
     val previewBottomSheetState = PodcastPreviewBottomSheetState()
-    val countryCodeSelectorState = CountryCodeSelectorState(
-        defaultCountryCode = defaultCountryCode
-    )
 
-    val countryCode = mutableStateOf("")
     val states = mutableStateMapOf<Int, State>()
 
     fun clickPodcastPreview(
@@ -94,10 +86,8 @@ class DiscoverViewModel(
         countryCode: String,
         currentPage: Int
     ) {
-        this@DiscoverViewModel.countryCode.value = countryCode
-
         resetStates()
-        updatePage(currentPage)
+        updatePage(countryCode, currentPage)
     }
 
     fun resetStates() {
@@ -107,6 +97,7 @@ class DiscoverViewModel(
     }
 
     fun updatePage(
+        countryCode: String,
         index: Int
     ) {
         val state = states[index]
@@ -117,13 +108,13 @@ class DiscoverViewModel(
 
             states[index] = try {
                 val elements = applePodcastClient.topPodcasts.load(
-                    countryCode = countryCode.value,
+                    countryCode = countryCode,
                     genre = topic.genre
                 )
 
                 State.Done(
                     result = elements,
-                    countryCode = countryCode.value
+                    countryCode = countryCode
                 )
             } catch(e: Exception) {
                 e.printStackTrace()

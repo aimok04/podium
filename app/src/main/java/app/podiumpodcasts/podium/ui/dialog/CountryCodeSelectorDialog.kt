@@ -22,9 +22,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -42,26 +40,12 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Locale
 
-class CountryCodeSelectorState(
-    val defaultCountryCode: String
-) {
-    val show = mutableStateOf(false)
-    var value by mutableStateOf(defaultCountryCode)
-
-    fun show() {
-        show.value = true
-    }
-
-    fun hide() {
-        show.value = false
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CountryCodeSelectorDialog(
-    state: CountryCodeSelectorState,
-    onUpdate: () -> Unit
+    value: String,
+    onValueChange: (value: String) -> Unit,
+    onDismiss: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
 
@@ -71,10 +55,10 @@ fun CountryCodeSelectorDialog(
     val countries by vm.filteredCountries.collectAsState()
     val query by vm.searchQuery.collectAsState()
 
-    if(state.show.value) ModalBottomSheet(
+    ModalBottomSheet(
         sheetState = sheetState,
         onDismissRequest = {
-            state.hide()
+            onDismiss()
         }
     ) {
         Column(
@@ -116,7 +100,7 @@ fun CountryCodeSelectorDialog(
                     val country = countries[it]
 
                     SegmentedListItem(
-                        selected = state.value == country.countryCode,
+                        selected = value == country.countryCode,
                         shapes = ListItemDefaults.segmentedShapes(
                             index = it,
                             count = countries.size
@@ -137,8 +121,7 @@ fun CountryCodeSelectorDialog(
 
                         onClick = {
                             scope.launch {
-                                state.value = country.countryCode
-                                onUpdate()
+                                onValueChange(country.countryCode)
                             }
                         }
                     )
