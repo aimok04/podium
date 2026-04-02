@@ -78,6 +78,9 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import app.podiumpodcasts.podium.AppActivity
 import app.podiumpodcasts.podium.R
 import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeBundle
@@ -125,10 +128,12 @@ fun PodcastDetailView(
     val db = LocalDatabase.current
     val activity = LocalActivity.current as AppActivity
 
-    val vm = viewModel<PodcastDetailViewModel>(key = podcast.origin)
+    val vm = viewModel(key = podcast.origin) {
+        PodcastDetailViewModel(db, podcast)
+    }
 
-    val subscription = vm.subscription(db, podcast).collectAsState(null)
-    val episodeBundleList = vm.episodeBundleList(db, podcast).collectAsState(listOf())
+    val subscription = vm.subscription.collectAsState(null)
+    val episodePager = vm.episodePager.collectAsLazyPagingItems()
 
     val isSubscribed = subscription.value != null
     val enableNotifications = subscription.value?.enableNotifications == true
@@ -138,7 +143,7 @@ fun PodcastDetailView(
 
     PullToRefreshBox(
         isRefreshing = vm.isRefreshing,
-        onRefresh = { vm.updatePodcast(db, activity, podcast) }
+        onRefresh = { vm.updatePodcast(activity, podcast) }
     ) {
         Scaffold(
             topBar = {
@@ -180,7 +185,7 @@ fun PodcastDetailView(
                 )
 
                 LazyColumn(
-                    state = if(episodeBundleList.value.isNotEmpty())
+                    state = if(episodePager.itemCount != 0)
                         vm.lazyListState
                     else
                         rememberLazyListState()
@@ -219,7 +224,7 @@ fun PodcastDetailView(
                                     if(podcast.imageSeedColor != 0) return@ShimmerAsyncImage
 
                                     if(it is AsyncImagePainter.State.Success) {
-                                        vm.updateImageSeedColor(db, activity, podcast.origin, it.result.image)
+                                        vm.updateImageSeedColor(activity, it.result.image)
                                     }
                                 },
 
@@ -287,9 +292,9 @@ fun PodcastDetailView(
                                     checked = isSubscribed,
                                     onCheckedChange = {
                                         if(!isSubscribed) {
-                                            vm.subscribe(db, podcast)
+                                            vm.subscribe()
                                         } else {
-                                            vm.unsubscribe(db, podcast)
+                                            vm.unsubscribe()
                                         }
                                     },
 
@@ -323,8 +328,8 @@ fun PodcastDetailView(
                                             checked = enableNotifications,
                                             onCheckedChange = {
                                                 when(enableNotifications) {
-                                                    true -> vm.disableNotifications(db, podcast)
-                                                    false -> vm.enableNotifications(db, podcast)
+                                                    true -> vm.disableNotifications()
+                                                    false -> vm.enableNotifications()
                                                 }
                                             },
 
@@ -352,8 +357,8 @@ fun PodcastDetailView(
                                             checked = enableAutoDownload,
                                             onCheckedChange = {
                                                 when(enableAutoDownload) {
-                                                    true -> vm.disableAutoDownload(db, podcast)
-                                                    false -> vm.enableAutoDownload(db, podcast)
+                                                    true -> vm.disableAutoDownload()
+                                                    false -> vm.enableAutoDownload()
                                                 }
                                             },
 
@@ -471,7 +476,8 @@ fun PodcastDetailView(
                         )
                     } else if(vm.selectedDestination == Destinations.EPISODES) {
                         podcastDetailViewEpisodesDestination(
-                            episodeBundleList = episodeBundleList.value,
+                            vm = vm,
+                            episodePager = episodePager,
                             onClickEpisode = onClickEpisode
                         )
                     }
@@ -498,7 +504,7 @@ fun PodcastDetailView(
         itemName = podcast.fetchTitle(),
         additionalText = stringResource(R.string.dialog_delete_confirmation_podcast),
         onConfirm = {
-            vm.deletePodcast(db, podcast)
+            vm.deletePodcast()
             onBack()
         }
     )
@@ -506,7 +512,8 @@ fun PodcastDetailView(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 fun LazyListScope.podcastDetailViewEpisodesDestination(
-    episodeBundleList: List<PodcastEpisodeBundle>,
+    vm: PodcastDetailViewModel,
+    episodePager: LazyPagingItems<PodcastEpisodeBundle>,
     onClickEpisode: (episode: PodcastEpisodeModel) -> Unit
 ) {
     item(
@@ -521,40 +528,46 @@ fun LazyListScope.podcastDetailViewEpisodesDestination(
     }
 
     items(
-        count = episodeBundleList.size,
-        key = {
-            "EPISODE:" + episodeBundleList[it].episode.id
-        }
+        count = episodePager.itemCount,
+        key = episodePager.itemKey { "EPISODE:${it.episode.id}" }
     ) {
+        val db = LocalDatabase.current
+
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .animateItem(),
             color = MaterialTheme.colorScheme.surfaceContainer
         ) {
-            val episodeBundle = episodeBundleList[it]
+            episodePager[it]?.let { episodeBundle ->
+                Box(
+                    Modifier.padding(
+                        top = 2.dp,
 
-            Box(
-                Modifier.padding(
-                    top = 2.dp,
-
-                    start = 16.dp,
-                    end = 16.dp
-                )
-            ) {
-                SwipeableItem(
-                    startAction = SwipeableItemActions.HearLaterAction(
-                        episodeId = episodeBundle.episode.id
+                        start = 16.dp,
+                        end = 16.dp
                     )
                 ) {
-                    PodcastEpisodeListItem(
-                        bundle = episodeBundle,
-                        index = it,
-                        count = episodeBundleList.size,
-                        onClick = {
-                            onClickEpisode(episodeBundle.episode)
-                        }
-                    )
+                    SwipeableItem(
+                        startAction = SwipeableItemActions.HearLaterAction(
+                            episodeId = episodeBundle.episode.id
+                        ),
+                        endAction = SwipeableItemActions.CheckAction(
+                            onAction = {
+                                vm.markAsPlayed(episodeBundle)
+                                true
+                            }
+                        )
+                    ) {
+                        PodcastEpisodeListItem(
+                            bundle = episodeBundle,
+                            index = it,
+                            count = episodePager.itemCount,
+                            onClick = {
+                                onClickEpisode(episodeBundle.episode)
+                            }
+                        )
+                    }
                 }
             }
         }

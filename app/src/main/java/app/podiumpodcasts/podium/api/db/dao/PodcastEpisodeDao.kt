@@ -16,6 +16,9 @@ interface PodcastEpisodeDao {
     @Query("SELECT * FROM podcastEpisode WHERE origin=:origin ORDER BY pubDate DESC")
     fun all(origin: String): Flow<List<PodcastEpisodeBundle>>
 
+    @Query("SELECT * FROM podcastEpisode WHERE origin=:origin ORDER BY pubDate DESC")
+    fun allPaged(origin: String): PagingSource<Int, PodcastEpisodeBundle>
+
     @Transaction
     @Query("SELECT * FROM podcastEpisode WHERE origin=:origin ORDER BY pubDate DESC")
     suspend fun allSync(origin: String): List<PodcastEpisodeBundle>
