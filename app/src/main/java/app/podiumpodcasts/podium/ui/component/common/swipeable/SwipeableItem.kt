@@ -8,12 +8,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,17 +25,19 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.podiumpodcasts.podium.R
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
 fun SwipeableItem(
+    scope: CoroutineScope,
+    snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
     startAction: SwipeableItemAction? = null,
     endAction: SwipeableItemAction? = null,
     content: @Composable RowScope.() -> Unit
 ) {
-    val scope = rememberCoroutineScope()
-
+    val resetOnNextDismiss = rememberSaveable { mutableStateOf(false) }
     val dismissState = rememberSwipeToDismissBoxState()
 
     val action = when(dismissState.dismissDirection) {
@@ -41,6 +47,8 @@ fun SwipeableItem(
     }
 
     val onAction = action?.onActionHandler()
+
+    val undo = stringResource(R.string.common_action_undo)
 
     SwipeToDismissBox(
         modifier = modifier,
@@ -78,7 +86,7 @@ fun SwipeableItem(
             ) {
                 Icon(
                     imageVector = style.icon,
-                    contentDescription = stringResource(R.string.common_action_delete),
+                    contentDescription = "",
                     tint = iconColor,
                     modifier = Modifier.graphicsLayer {
                         scaleX =
@@ -91,8 +99,28 @@ fun SwipeableItem(
         },
         onDismiss = {
             scope.launch {
-                if(onAction?.invoke() ?: false)
+                if(resetOnNextDismiss.value) {
                     dismissState.reset()
+                    resetOnNextDismiss.value = false
+                } else {
+                    onAction?.let {
+                        resetOnNextDismiss.value = true
+
+                        val result = onAction()
+                        if(!result.isDismissed) dismissState.reset()
+
+                        snackbarHostState.currentSnackbarData?.dismiss()
+
+                        val snackBarResult = snackbarHostState.showSnackbar(
+                            message = result.message,
+                            actionLabel = undo,
+                            duration = SnackbarDuration.Short
+                        )
+
+                        if(snackBarResult == SnackbarResult.ActionPerformed)
+                            result.onUndo()
+                    }
+                }
             }
         },
         content = content

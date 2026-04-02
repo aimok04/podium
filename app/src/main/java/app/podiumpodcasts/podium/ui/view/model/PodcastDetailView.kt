@@ -61,6 +61,7 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -88,11 +89,13 @@ import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeModel
 import app.podiumpodcasts.podium.api.db.model.PodcastModel
 import app.podiumpodcasts.podium.ui.component.DetailsList
 import app.podiumpodcasts.podium.ui.component.DetailsListItemModel
+import app.podiumpodcasts.podium.ui.component.PodiumSnackbarHost
 import app.podiumpodcasts.podium.ui.component.common.BackButton
 import app.podiumpodcasts.podium.ui.component.common.BubbleButton
 import app.podiumpodcasts.podium.ui.component.common.ButtonLabelWithIconInset
 import app.podiumpodcasts.podium.ui.component.common.ExpandableText
 import app.podiumpodcasts.podium.ui.component.common.swipeable.SwipeableItem
+import app.podiumpodcasts.podium.ui.component.common.swipeable.SwipeableItemActionResult
 import app.podiumpodcasts.podium.ui.component.common.swipeable.SwipeableItemActions
 import app.podiumpodcasts.podium.ui.component.media.FloatingMediaPlayerSpacer
 import app.podiumpodcasts.podium.ui.component.model.ContentFavoriteButton
@@ -108,6 +111,7 @@ import app.podiumpodcasts.podium.ui.vm.PodcastDetailViewModel
 import coil3.compose.AsyncImagePainter
 import com.materialkolor.ktx.harmonizeWithPrimary
 import dev.chrisbanes.haze.hazeEffect
+import kotlinx.coroutines.CoroutineScope
 
 enum class Destinations(
     val index: Int,
@@ -125,6 +129,8 @@ fun PodcastDetailView(
     onBack: () -> Unit,
     onClickEpisode: (episode: PodcastEpisodeModel) -> Unit
 ) {
+    val scope = rememberCoroutineScope()
+
     val db = LocalDatabase.current
     val activity = LocalActivity.current as AppActivity
 
@@ -146,6 +152,9 @@ fun PodcastDetailView(
         onRefresh = { vm.updatePodcast(activity, podcast) }
     ) {
         Scaffold(
+            snackbarHost = {
+                PodiumSnackbarHost(vm.snackbarHostState)
+            },
             topBar = {
                 TopAppBar(
                     navigationIcon = {
@@ -477,6 +486,7 @@ fun PodcastDetailView(
                     } else if(vm.selectedDestination == Destinations.EPISODES) {
                         podcastDetailViewEpisodesDestination(
                             vm = vm,
+                            scope = scope,
                             episodePager = episodePager,
                             onClickEpisode = onClickEpisode
                         )
@@ -513,6 +523,7 @@ fun PodcastDetailView(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 fun LazyListScope.podcastDetailViewEpisodesDestination(
     vm: PodcastDetailViewModel,
+    scope: CoroutineScope,
     episodePager: LazyPagingItems<PodcastEpisodeBundle>,
     onClickEpisode: (episode: PodcastEpisodeModel) -> Unit
 ) {
@@ -531,8 +542,6 @@ fun LazyListScope.podcastDetailViewEpisodesDestination(
         count = episodePager.itemCount,
         key = episodePager.itemKey { "EPISODE:${it.episode.id}" }
     ) {
-        val db = LocalDatabase.current
-
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
@@ -549,25 +558,36 @@ fun LazyListScope.podcastDetailViewEpisodesDestination(
                     )
                 ) {
                     SwipeableItem(
+                        snackbarHostState = vm.snackbarHostState,
+                        scope = scope,
+
                         startAction = SwipeableItemActions.HearLaterAction(
                             episodeId = episodeBundle.episode.id
                         ),
                         endAction = SwipeableItemActions.CheckAction(
                             onAction = {
                                 vm.markAsPlayed(episodeBundle)
-                                true
+
+                                SwipeableItemActionResult(
+                                    isDismissed = false,
+                                    message = "Marked as played.",
+                                    onUndo = {
+                                        vm.markAsUnplayed(episodeBundle)
+                                    }
+                                )
                             }
-                        )
-                    ) {
-                        PodcastEpisodeListItem(
-                            bundle = episodeBundle,
-                            index = it,
-                            count = episodePager.itemCount,
-                            onClick = {
-                                onClickEpisode(episodeBundle.episode)
-                            }
-                        )
-                    }
+                        ),
+                        content = {
+                            PodcastEpisodeListItem(
+                                bundle = episodeBundle,
+                                index = it,
+                                count = episodePager.itemCount,
+                                onClick = {
+                                    onClickEpisode(episodeBundle.episode)
+                                }
+                            )
+                        },
+                    )
                 }
             }
         }

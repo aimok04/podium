@@ -35,11 +35,12 @@ interface ListItemDao {
         contentId: String,
         isPodcast: Boolean,
         position: Int
-    ) {
-        _addListItem(listId, contentId, isPodcast, position)
+    ): Int {
+        val id = _addListItem(listId, contentId, isPodcast, position)
         _refreshItemCount(listId)
 
         if(position < 4) _updateCover(listId)
+        return id.toInt()
     }
 
     @Transaction
@@ -66,7 +67,12 @@ interface ListItemDao {
     suspend fun getNextPosition(listId: Int): Int?
 
     @Query("INSERT INTO listItem (listId, contentId, isPodcast, position) VALUES (:listId, :contentId, :isPodcast, :position)")
-    suspend fun _addListItem(listId: Int, contentId: String, isPodcast: Boolean, position: Int)
+    suspend fun _addListItem(
+        listId: Int,
+        contentId: String,
+        isPodcast: Boolean,
+        position: Int
+    ): Long
 
     @Query("DELETE FROM listItem WHERE id = :id")
     suspend fun _deleteById(id: Int)

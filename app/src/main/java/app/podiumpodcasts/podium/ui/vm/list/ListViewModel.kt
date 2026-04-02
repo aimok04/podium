@@ -8,6 +8,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import app.podiumpodcasts.podium.api.db.AppDatabase
 import app.podiumpodcasts.podium.api.db.model.ListItemModelBundle
+import app.podiumpodcasts.podium.api.db.model.SystemLists
 import app.podiumpodcasts.podium.ui.dialog.bottomsheet.ListEditBottomSheetState
 import kotlinx.coroutines.launch
 
@@ -33,6 +34,27 @@ class ListViewModel(
     fun deleteList() {
         viewModelScope.launch {
             db.lists().delete(listId)
+        }
+    }
+
+    fun restore(item: ListItemModelBundle) {
+        viewModelScope.launch {
+            val tempPosition = db.listItems().getNextPosition(SystemLists.FAVORITES.id)
+                ?: 0
+
+            val listItemId = db.listItems().addListItemAndRefreshItemCount(
+                listId = item.listItem.listId,
+                contentId = item.listItem.contentId,
+                isPodcast = item.listItem.isPodcast,
+                position = tempPosition
+            )
+
+            db.listItems().moveAndReindex(
+                listId = item.listItem.listId,
+                itemId = listItemId,
+                fromPos = tempPosition,
+                toPos = item.listItem.position
+            )
         }
     }
 

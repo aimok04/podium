@@ -31,6 +31,7 @@
     <string name="common_action_select_file">Select file</string>
     <string name="common_action_subscribe">Subscribe</string>
     <string name="common_action_toggle_playback_speed">Toggle playback speed</string>
+    <string name="common_action_undo">Undo</string>
     <string name="common_action_unsubscribe">Unsubscribe</string>
     <string name="common_action_wait">Wait</string>
     <string name="common_action_yes">Yes</string>
@@ -194,6 +195,13 @@
     <string name="route_settings_roaming_warning_description">Using data on foreign networks can result in significant roaming charges from your carrier. Do you want to continue?</string>
     <string name="route_settings_roaming_warning_title">Caution</string>
     <string name="route_subscriptions">Subscriptions</string>
+
+    <string name="snackbar_added_to_hear_later">Added to » Hear later «</string>
+    <string name="snackbar_element_deleted">Element deleted</string>
+    <string name="snackbar_marked_as_played">Marked as played</string>
+    <string name="snackbar_marked_as_seen">Marked as seen</string>
+    <string name="snackbar_removed_from_hear_later">Removed from » Hear later «</string>
+    <string name="snackbar_reset_progress">Reset progress</string>
 
     <string name="system_lists_favorites_label">Favorites</string>
     <string name="system_lists_hear_later_label">Hear later</string>

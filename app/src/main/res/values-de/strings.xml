@@ -31,6 +31,7 @@
     <string name="common_action_select_file">Datei auswählen</string>
     <string name="common_action_subscribe">Abonnieren</string>
     <string name="common_action_toggle_playback_speed">Wiedergabegeschwindigkeit ändern</string>
+    <string name="common_action_undo">Rückgängig</string>
     <string name="common_action_unsubscribe">Abbestellen</string>
     <string name="common_action_wait">Warten</string>
     <string name="common_action_yes">Ja</string>
@@ -194,6 +195,13 @@
     <string name="route_settings_roaming_warning_description">Das Verbrauchen von Datenvolumen in fremden Netzen kann mit hohen Kosten verbunden sein. Möchtest du trotzdem fortfahren?</string>
     <string name="route_settings_roaming_warning_title">Achtung</string>
     <string name="route_subscriptions">Abonnements</string>
+
+    <string name="snackbar_added_to_hear_later">zu » Später anhören « hinzugefügt</string>
+    <string name="snackbar_element_deleted">Element gelöscht</string>
+    <string name="snackbar_marked_as_played">Als gehört markiert</string>
+    <string name="snackbar_marked_as_seen">Als gesehen markiert</string>
+    <string name="snackbar_removed_from_hear_later">aus » Später anhören « entfernt</string>
+    <string name="snackbar_reset_progress">Fortschritt zurückgesetzt</string>
 
     <string name="system_lists_favorites_label">Favoriten</string>
     <string name="system_lists_hear_later_label">Später anhören</string>

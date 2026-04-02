@@ -1,6 +1,7 @@
 package app.podiumpodcasts.podium.ui.vm
 
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
@@ -18,6 +19,7 @@ class HistoryViewModel(
 ) : ViewModel() {
 
     val lazyListState = LazyListState()
+    val snackbarHostState = SnackbarHostState()
 
     private val now = LocalDate.now()
     private val zone = ZoneId.systemDefault()
@@ -96,6 +98,13 @@ class HistoryViewModel(
         db.podcastHistory()
             .allBefore(startOfYear)
     }.flow
+
+    fun insert(element: PodcastHistoryBundle) {
+        viewModelScope.launch {
+            db.podcastHistory()
+                .insert(element.history)
+        }
+    }
 
     fun delete(element: PodcastHistoryBundle) {
         viewModelScope.launch {

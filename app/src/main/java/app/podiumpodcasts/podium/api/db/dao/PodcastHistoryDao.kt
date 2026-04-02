@@ -3,8 +3,8 @@ package app.podiumpodcasts.podium.api.db.dao
 import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Delete
+import androidx.room.Insert
 import androidx.room.Query
-import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeModel
 import app.podiumpodcasts.podium.api.db.model.PodcastHistoryBundle
 import app.podiumpodcasts.podium.api.db.model.PodcastHistoryModel
 import kotlinx.coroutines.flow.Flow
@@ -39,6 +39,9 @@ interface PodcastHistoryDao {
         episodeId: String,
         timestamp: Long = System.currentTimeMillis()
     )
+
+    @Insert
+    suspend fun insert(item: PodcastHistoryModel)
 
     @Delete
     suspend fun delete(item: PodcastHistoryModel)

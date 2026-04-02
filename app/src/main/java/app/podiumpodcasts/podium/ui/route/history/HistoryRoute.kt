@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -34,8 +35,10 @@ import app.podiumpodcasts.podium.R
 import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeBundle
 import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeModel
 import app.podiumpodcasts.podium.api.db.model.PodcastHistoryBundle
+import app.podiumpodcasts.podium.ui.component.PodiumSnackbarHost
 import app.podiumpodcasts.podium.ui.component.common.BackButton
 import app.podiumpodcasts.podium.ui.component.common.swipeable.SwipeableItem
+import app.podiumpodcasts.podium.ui.component.common.swipeable.SwipeableItemActionResult
 import app.podiumpodcasts.podium.ui.component.common.swipeable.SwipeableItemActions
 import app.podiumpodcasts.podium.ui.component.layout.InfoLayout
 import app.podiumpodcasts.podium.ui.component.media.FloatingMediaPlayerSpacer
@@ -45,6 +48,7 @@ import app.podiumpodcasts.podium.ui.helper.LocalDatabase
 import app.podiumpodcasts.podium.ui.helper.PagerScaffold
 import app.podiumpodcasts.podium.ui.theme.Typography
 import app.podiumpodcasts.podium.ui.vm.HistoryViewModel
+import kotlinx.coroutines.CoroutineScope
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -52,6 +56,8 @@ fun HistoryRoute(
     onClickEpisode: (episode: PodcastEpisodeModel) -> Unit,
     onBack: () -> Unit
 ) {
+    val scope = rememberCoroutineScope()
+
     val db = LocalDatabase.current
     val vm = viewModel { HistoryViewModel(db) }
 
@@ -77,6 +83,9 @@ fun HistoryRoute(
 
     Scaffold(
         Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        snackbarHost = {
+            PodiumSnackbarHost(vm.snackbarHostState)
+        },
         topBar = {
             CenterAlignedTopAppBar(
                 scrollBehavior = scrollBehavior,
@@ -117,6 +126,7 @@ fun HistoryRoute(
             ) {
                 pagerSection(
                     vm = vm,
+                    scope = scope,
                     label = R.string.route_history_today,
                     pager = todayPager,
                     onClickEpisode = onClickEpisode
@@ -124,6 +134,7 @@ fun HistoryRoute(
 
                 pagerSection(
                     vm = vm,
+                    scope = scope,
                     label = R.string.route_history_this_week,
                     pager = weekPager,
                     onClickEpisode = onClickEpisode
@@ -131,6 +142,7 @@ fun HistoryRoute(
 
                 pagerSection(
                     vm = vm,
+                    scope = scope,
                     label = R.string.route_history_this_month,
                     pager = monthPager,
                     onClickEpisode = onClickEpisode
@@ -138,6 +150,7 @@ fun HistoryRoute(
 
                 pagerSection(
                     vm = vm,
+                    scope = scope,
                     label = R.string.route_history_this_year,
                     pager = yearPager,
                     onClickEpisode = onClickEpisode
@@ -145,6 +158,7 @@ fun HistoryRoute(
 
                 pagerSection(
                     vm = vm,
+                    scope = scope,
                     label = R.string.route_history_older,
                     pager = olderPager,
                     onClickEpisode = onClickEpisode
@@ -161,6 +175,7 @@ fun HistoryRoute(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 fun LazyListScope.pagerSection(
     vm: HistoryViewModel,
+    scope: CoroutineScope,
     label: Int,
     pager: LazyPagingItems<PodcastHistoryBundle>,
     onClickEpisode: (episode: PodcastEpisodeModel) -> Unit
@@ -173,6 +188,7 @@ fun LazyListScope.pagerSection(
                 Modifier
                     .padding(12.dp)
                     .padding(top = 16.dp)
+                    .animateItem()
             ) {
                 Text(
                     text = stringResource(label),
@@ -188,38 +204,50 @@ fun LazyListScope.pagerSection(
         ) {
             val historyElement = pager[it] ?: return@items
 
+            val elementDeleted = stringResource(R.string.snackbar_element_deleted)
+
             SwipeableItem(
+                scope = scope,
                 modifier = Modifier.animateItem(),
+                snackbarHostState = vm.snackbarHostState,
                 endAction = SwipeableItemActions.DeleteAction {
                     vm.delete(historyElement)
-                    false
-                }
-            ) {
-                PodcastEpisodeListItem(
-                    bundle = PodcastEpisodeBundle(
-                        episode = historyElement.episode,
-                        playState = historyElement.playState,
-                        download = historyElement.download
-                    ),
 
-                    overlineText = formatPubDate(
-                        LocalContext.current,
-                        historyElement.history.timestamp / 1000L
-                    ),
-                    descriptionText = historyElement.episode.podcastTitle,
+                    SwipeableItemActionResult(
+                        isDismissed = true,
+                        message = elementDeleted,
+                        onUndo = {
+                            vm.insert(historyElement)
+                        }
+                    )
+                },
+                content = {
+                    PodcastEpisodeListItem(
+                        bundle = PodcastEpisodeBundle(
+                            episode = historyElement.episode,
+                            playState = historyElement.playState,
+                            download = historyElement.download
+                        ),
 
-                    index = it,
-                    count = pager.itemCount,
+                        overlineText = formatPubDate(
+                            LocalContext.current,
+                            historyElement.history.timestamp / 1000L
+                        ),
+                        descriptionText = historyElement.episode.podcastTitle,
 
-                    colors = ListItemDefaults.segmentedColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-                    ),
+                        index = it,
+                        count = pager.itemCount,
 
-                    onClick = {
-                        onClickEpisode(historyElement.episode)
-                    }
-                )
-            }
+                        colors = ListItemDefaults.segmentedColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                        ),
+
+                        onClick = {
+                            onClickEpisode(historyElement.episode)
+                        }
+                    )
+                },
+            )
         }
     }
 }

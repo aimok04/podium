@@ -30,4 +30,11 @@ class NewEpisodesViewModel(
         }
     }
 
+    fun new(item: PodcastEpisodeBundle) {
+        viewModelScope.launch {
+            db.podcastEpisodes()
+                .newAndUpdateNewEpisodesCount(item.episode.origin, item.episode.id)
+        }
+    }
+
 }

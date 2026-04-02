@@ -14,11 +14,15 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -27,8 +31,10 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import app.podiumpodcasts.podium.R
 import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeModel
+import app.podiumpodcasts.podium.ui.component.PodiumSnackbarHost
 import app.podiumpodcasts.podium.ui.component.common.BackButton
 import app.podiumpodcasts.podium.ui.component.common.swipeable.SwipeableItem
+import app.podiumpodcasts.podium.ui.component.common.swipeable.SwipeableItemActionResult
 import app.podiumpodcasts.podium.ui.component.common.swipeable.SwipeableItemActions
 import app.podiumpodcasts.podium.ui.component.layout.InfoLayout
 import app.podiumpodcasts.podium.ui.component.media.FloatingMediaPlayerSpacer
@@ -43,6 +49,9 @@ fun ContinuePlayingRoute(
     onClickEpisode: (episode: PodcastEpisodeModel) -> Unit,
     onBack: () -> Unit
 ) {
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
     val db = LocalDatabase.current
     val vm = viewModel { ContinuePlayingViewModel(db) }
 
@@ -50,8 +59,13 @@ fun ContinuePlayingRoute(
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
     Scaffold(
         Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        snackbarHost = {
+            PodiumSnackbarHost(snackbarHostState)
+        },
         topBar = {
             CenterAlignedTopAppBar(
                 scrollBehavior = scrollBehavior,
@@ -96,18 +110,51 @@ fun ContinuePlayingRoute(
                 ) {
                     val item = continuePlaying[it] ?: return@items
 
+                    val markedAsPlayed = stringResource(R.string.snackbar_marked_as_played)
+                    val resetProgress = stringResource(R.string.snackbar_reset_progress)
+
                     SwipeableItem(
+                        scope = scope,
                         modifier = Modifier.animateItem(),
+                        snackbarHostState = snackbarHostState,
                         startAction = SwipeableItemActions.CheckAction(
                             onAction = {
+                                val previousPlayed = item.playState.played
+                                val previousState = item.playState.state
+
                                 vm.markAsPlayed(item)
-                                false
+
+                                SwipeableItemActionResult(
+                                    isDismissed = true,
+                                    message = markedAsPlayed,
+                                    onUndo = {
+                                        vm.setPlayState(
+                                            item = item,
+                                            played = previousPlayed,
+                                            state = previousState
+                                        )
+                                    }
+                                )
                             }
                         ),
                         endAction = SwipeableItemActions.ResetAction(
                             onAction = {
+                                val previousPlayed = item.playState.played
+                                val previousState = item.playState.state
+
                                 vm.resetPlayState(item)
-                                false
+
+                                SwipeableItemActionResult(
+                                    isDismissed = true,
+                                    message = resetProgress,
+                                    onUndo = {
+                                        vm.setPlayState(
+                                            item = item,
+                                            played = previousPlayed,
+                                            state = previousState
+                                        )
+                                    }
+                                )
                             }
                         )
                     ) {

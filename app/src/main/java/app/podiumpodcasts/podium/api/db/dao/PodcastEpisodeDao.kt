@@ -53,6 +53,14 @@ interface PodcastEpisodeDao {
     fun search(query: String): PagingSource<Int, PodcastEpisodeBundle>
 
     @Transaction
+    suspend fun newAndUpdateNewEpisodesCount(
+        origin: String, episodeId: String
+    ) {
+        _new(episodeId)
+        _updateNewEpisodesCount(origin)
+    }
+
+    @Transaction
     suspend fun unnewAndUpdateNewEpisodesCount(
         origin: String, episodeId: String
     ) {
@@ -77,6 +85,9 @@ interface PodcastEpisodeDao {
 
     @Insert
     suspend fun _insertAll(vararg episodes: PodcastEpisodeModel)
+
+    @Query("UPDATE podcastEpisode SET new=1 WHERE id=:id")
+    suspend fun _new(id: String)
 
     @Query("UPDATE podcastEpisode SET new=0 WHERE id=:id")
     suspend fun _unnew(id: String)

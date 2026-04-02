@@ -19,10 +19,13 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -34,9 +37,11 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import app.podiumpodcasts.podium.R
 import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeModel
+import app.podiumpodcasts.podium.ui.component.PodiumSnackbarHost
 import app.podiumpodcasts.podium.ui.component.common.BackButton
 import app.podiumpodcasts.podium.ui.component.common.BubbleButton
 import app.podiumpodcasts.podium.ui.component.common.swipeable.SwipeableItem
+import app.podiumpodcasts.podium.ui.component.common.swipeable.SwipeableItemActionResult
 import app.podiumpodcasts.podium.ui.component.common.swipeable.SwipeableItemActions
 import app.podiumpodcasts.podium.ui.component.layout.InfoLayout
 import app.podiumpodcasts.podium.ui.component.media.FloatingMediaPlayerSpacer
@@ -59,8 +64,9 @@ fun ListRoute(
 
     onBack: () -> Unit
 ) {
-    val db = LocalDatabase.current
+    val scope = rememberCoroutineScope()
 
+    val db = LocalDatabase.current
     val vm = viewModel(key = listId.toString()) { ListViewModel(db, listId) }
 
     val list = db.lists().get(listId).collectAsState(null)
@@ -76,8 +82,13 @@ fun ListRoute(
         vm.move(from.index - 1, to.index - 1)
     }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
     Scaffold(
         Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        snackbarHost = {
+            PodiumSnackbarHost(snackbarHostState)
+        },
         topBar = {
             CenterAlignedTopAppBar(
                 scrollBehavior = scrollBehavior,
@@ -160,29 +171,42 @@ fun ListRoute(
                         state = reorderableLazyGridState,
                         key = item.listItem.id
                     ) {
+                        val elementDeleted = stringResource(R.string.snackbar_element_deleted)
+
                         SwipeableItem(
+                            scope = scope,
+                            snackbarHostState = snackbarHostState,
+
                             modifier = Modifier
                                 .animateItem()
                                 .longPressDraggableHandle(),
                             endAction = SwipeableItemActions.DeleteAction {
                                 vm.delete(item)
-                                false
-                            }
-                        ) {
-                            ListItemListItem(
-                                listItem = item,
 
-                                index = index,
-                                count = items.itemCount,
+                                SwipeableItemActionResult(
+                                    isDismissed = true,
+                                    message = elementDeleted,
+                                    onUndo = {
+                                        vm.restore(item)
+                                    }
+                                )
+                            },
+                            content = {
+                                ListItemListItem(
+                                    listItem = item,
 
-                                colors = ListItemDefaults.segmentedColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-                                ),
+                                    index = index,
+                                    count = items.itemCount,
 
-                                onClickPodcast = onClickPodcast,
-                                onClickEpisode = onClickEpisode
-                            )
-                        }
+                                    colors = ListItemDefaults.segmentedColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                                    ),
+
+                                    onClickPodcast = onClickPodcast,
+                                    onClickEpisode = onClickEpisode
+                                )
+                            },
+                        )
                     }
                 }
 

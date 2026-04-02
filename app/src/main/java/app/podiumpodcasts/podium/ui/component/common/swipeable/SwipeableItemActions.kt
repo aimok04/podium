@@ -12,6 +12,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import app.podiumpodcasts.podium.R
 import app.podiumpodcasts.podium.api.db.model.SystemLists
 import app.podiumpodcasts.podium.ui.helper.LocalDatabase
 
@@ -23,14 +25,20 @@ data class SwipeableItemActionStyle(
     val activeIconTint: Color
 )
 
+data class SwipeableItemActionResult(
+    val isDismissed: Boolean,
+    val message: String,
+    val onUndo: suspend () -> Unit
+)
+
 abstract class SwipeableItemAction(
     val style: @Composable () -> SwipeableItemActionStyle,
-    val onActionHandler: @Composable () -> (suspend () -> Boolean)
+    val onActionHandler: @Composable () -> (suspend () -> SwipeableItemActionResult)
 )
 
 interface SwipeableItemActions {
     class DeleteAction(
-        onAction: suspend () -> Boolean
+        onAction: suspend () -> SwipeableItemActionResult
     ) : SwipeableItemAction(
         style = {
             SwipeableItemActionStyle(
@@ -47,7 +55,7 @@ interface SwipeableItemActions {
     )
 
     class CheckAction(
-        onAction: suspend () -> Boolean
+        onAction: suspend () -> SwipeableItemActionResult
     ) : SwipeableItemAction(
         style = {
             SwipeableItemActionStyle(
@@ -64,7 +72,7 @@ interface SwipeableItemActions {
     )
 
     class ResetAction(
-        onAction: suspend () -> Boolean
+        onAction: suspend () -> SwipeableItemActionResult
     ) : SwipeableItemAction(
         style = {
             SwipeableItemActionStyle(
@@ -101,16 +109,34 @@ interface SwipeableItemActions {
                 activeIconTint = MaterialTheme.colorScheme.onTertiary,
             )
         },
-        onActionHandler = {
+        onActionHandler = actionHandler@{
             val db = LocalDatabase.current
 
-            {
+            val removedFromHearLater = stringResource(R.string.snackbar_removed_from_hear_later)
+            val addedToHearLater = stringResource(R.string.snackbar_added_to_hear_later)
+
+            return@actionHandler {
                 if(db.listItems().isOnHearLater(episodeId)) {
                     val item = db.listItems().get(SystemLists.HEAR_LATER.id, episodeId)
                     db.listItems().deleteAndReindex(
                         listId = SystemLists.HEAR_LATER.id,
                         itemId = item.id,
                         deletedPosition = item.position
+                    )
+
+                    SwipeableItemActionResult(
+                        isDismissed = false,
+                        message = removedFromHearLater,
+                        onUndo = {
+                            val nextPosition =
+                                db.listItems().getNextPosition(SystemLists.HEAR_LATER.id)
+                            db.listItems().addListItemAndRefreshItemCount(
+                                listId = SystemLists.HEAR_LATER.id,
+                                contentId = episodeId,
+                                isPodcast = false,
+                                position = nextPosition ?: 0
+                            )
+                        }
                     )
                 } else {
                     val nextPosition = db.listItems().getNextPosition(SystemLists.HEAR_LATER.id)
@@ -120,9 +146,20 @@ interface SwipeableItemActions {
                         isPodcast = false,
                         position = nextPosition ?: 0
                     )
-                }
 
-                true
+                    SwipeableItemActionResult(
+                        isDismissed = false,
+                        message = addedToHearLater,
+                        onUndo = {
+                            val item = db.listItems().get(SystemLists.HEAR_LATER.id, episodeId)
+                            db.listItems().deleteAndReindex(
+                                listId = SystemLists.HEAR_LATER.id,
+                                itemId = item.id,
+                                deletedPosition = item.position
+                            )
+                        }
+                    )
+                }
             }
         }
     )

@@ -39,4 +39,13 @@ class ContinuePlayingViewModel(
         }
     }
 
+    fun setPlayState(item: PodcastPlayStateBundle, played: Boolean, state: Int) {
+        viewModelScope.launch {
+            db.podcastEpisodePlayStates()
+                .savePlayed(item.episode.id, played)
+            db.podcastEpisodePlayStates()
+                .saveState(item.episode.id, state)
+        }
+    }
+
 }

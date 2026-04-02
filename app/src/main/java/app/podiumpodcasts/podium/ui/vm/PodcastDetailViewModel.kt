@@ -2,6 +2,7 @@ package app.podiumpodcasts.podium.ui.vm
 
 import android.content.Context
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -49,6 +50,7 @@ class PodcastDetailViewModel(
         db.podcastSubscriptions().get(podcast.origin)
 
     val lazyListState = LazyListState()
+    val snackbarHostState = SnackbarHostState()
 
     fun updatePodcast(context: Context, podcast: PodcastModel) {
         viewModelScope.launch {
@@ -109,6 +111,13 @@ class PodcastDetailViewModel(
         viewModelScope.launch {
             db.podcastEpisodePlayStates()
                 .savePlayed(episode.episode.id, true)
+        }
+    }
+
+    fun markAsUnplayed(episode: PodcastEpisodeBundle) {
+        viewModelScope.launch {
+            db.podcastEpisodePlayStates()
+                .savePlayed(episode.episode.id, false)
         }
     }
 
