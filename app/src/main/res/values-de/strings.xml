@@ -154,7 +154,7 @@
     <string name="route_settings_background_activity_allow_update_while_roaming">Aktualisierungen im Roaming erlauben</string>
     <string name="route_settings_background_activity_allow_update_while_roaming_description">Das Verbrauchen von Datenvolumen in fremden Netzen kann mit hohen Kosten verbunden sein</string>
     <string name="route_settings_background_activity_update_frequency">Aktualisierungsfrequenz</string>
-    <string name="route_settings_background_activity_update_frequency_every_hours">jede %1%d std</string>
+    <string name="route_settings_background_activity_update_frequency_every_hours">jede %1$d std</string>
     <string name="route_settings_background_activity_update_frequency_every_hours_mins">jede %1$d std, %2$d min</string>
     <string name="route_settings_background_activity_update_frequency_every_min">jede %1$d min</string>
     <string name="route_settings_background_activity_update_frequency_usage">%1$s pro Monat</string>
