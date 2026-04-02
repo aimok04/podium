@@ -6,6 +6,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.drawable.toBitmap
@@ -15,20 +16,69 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import app.podiumpodcasts.podium.api.db.AppDatabase
+import app.podiumpodcasts.podium.api.db.dao.PodcastEpisodesFilter
+import app.podiumpodcasts.podium.api.db.dao.PodcastEpisodesOrder
+import app.podiumpodcasts.podium.api.db.dao.PodcastEpisodesOrderBy
 import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeBundle
 import app.podiumpodcasts.podium.api.db.model.PodcastModel
 import app.podiumpodcasts.podium.background.work.SingularPodcastUpdateWork
+import app.podiumpodcasts.podium.ui.component.model.podcast.PodcastSearchFilterOrderBarState
 import app.podiumpodcasts.podium.ui.view.model.Destinations
 import coil3.Image
 import coil3.asDrawable
 import com.materialkolor.ktx.themeColorOrNull
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
+
+private data class QueryBundle(
+    val search: String,
+    val orderBy: PodcastEpisodesOrderBy,
+    val order: PodcastEpisodesOrder,
+    val filter: Set<PodcastEpisodesFilter>,
+    val filterNot: Set<PodcastEpisodesFilter>
+)
 
 class PodcastDetailViewModel(
     val db: AppDatabase,
     val podcast: PodcastModel
 ) : ViewModel() {
+
+    val searchFilterOrderBarState = PodcastSearchFilterOrderBarState()
+
+    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+    val episodePager =
+        snapshotFlow {
+            QueryBundle(
+                search = searchFilterOrderBarState.searchQuery.value,
+                orderBy = searchFilterOrderBarState.orderBy.value,
+                order = searchFilterOrderBarState.order.value,
+                filter = searchFilterOrderBarState.filter.toSet(),
+                filterNot = searchFilterOrderBarState.negativeFilter.toSet()
+            )
+        }
+            .distinctUntilChanged()
+            .flatMapLatest { q ->
+                Pager(PagingConfig(pageSize = 15)) {
+                    val query = db.podcastEpisodes().buildQuery(
+                        origin = podcast.origin,
+                        searchQuery = q.search,
+                        orderBy = q.orderBy,
+                        order = q.order,
+                        filter = q.filter,
+                        filterNot = q.filterNot
+                    )
+
+                    db.podcastEpisodes().queryPaged(query)
+                }.flow
+            }
+            .cachedIn(viewModelScope)
+
+    val subscription =
+        db.podcastSubscriptions().get(podcast.origin)
 
     var selectedDestination by mutableStateOf(Destinations.EPISODES)
 
@@ -36,18 +86,6 @@ class PodcastDetailViewModel(
 
     val showSettingsBottomSheet = mutableStateOf(false)
     val showDeleteDialog = mutableStateOf(false)
-
-    val episodePager = Pager(
-        PagingConfig(
-            pageSize = 15
-        )
-    ) {
-        db.podcastEpisodes()
-            .allPaged(podcast.origin)
-    }.flow.cachedIn(viewModelScope)
-
-    val subscription =
-        db.podcastSubscriptions().get(podcast.origin)
 
     val lazyListState = LazyListState()
     val snackbarHostState = SnackbarHostState()

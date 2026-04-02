@@ -25,6 +25,7 @@
     <string name="common_action_remove_from_favorites">Remove from favorites</string>
     <string name="common_action_remove_from_queue">Remove from queue</string>
     <string name="common_action_save">Save</string>
+    <string name="common_action_scroll_to_top">Scroll to top</string>
     <string name="common_action_seek_back">Seek back</string>
     <string name="common_action_seek_forward">Seek forward</string>
     <string name="common_action_select_country_code">Select country code</string>
@@ -36,21 +37,26 @@
     <string name="common_action_wait">Wait</string>
     <string name="common_action_yes">Yes</string>
     <string name="common_are_you_sure">Are you sure?</string>
+    <string name="common_ascending">Ascending</string>
     <string name="common_audio_file">Audio file</string>
     <string name="common_author">Author</string>
     <string name="common_confirmation">Confirmation</string>
     <string name="common_cover_image">Cover image</string>
     <string name="common_data_usage_per_update">Data usage per update</string>
+    <string name="common_descending">Descending</string>
     <string name="common_done">Done</string>
     <string name="common_downloaded">Downloaded</string>
     <string name="common_downloaded_at">Downloaded</string>
     <string name="common_downloading">Downloading…</string>
     <string name="common_duration">Duration</string>
     <string name="common_episodes">Episodes</string>
+    <string name="common_filter">Filter</string>
     <string name="common_guid">Id (Guid)</string>
     <string name="common_info">Info</string>
     <string name="common_language_code">Language code</string>
+    <string name="common_negative">Negative</string>
     <string name="common_new_uppercase">NEW</string>
+    <string name="common_order_by">Order by</string>
     <string name="common_playback_speed">Speed</string>
     <string name="common_queue">Queue</string>
     <string name="common_rss_feed">Origin (rss feed)</string>
@@ -74,6 +80,17 @@
     <string name="dialog_delete_confirmation_text">Do you really want to delete » %1$s «?</string>
     <string name="dialog_edit_list_title">Edit list</string>
 
+    <string name="filter_downloaded">Downloaded</string>
+    <string name="filter_downloaded_inverted">Not downloaded</string>
+    <string name="filter_favorite">Favorite</string>
+    <string name="filter_favorite_inverted">Not favorite</string>
+    <string name="filter_new">New</string>
+    <string name="filter_new_inverted">Not new</string>
+    <string name="filter_paused">Paused</string>
+    <string name="filter_paused_inverted">Not paused</string>
+    <string name="filter_played">Played</string>
+    <string name="filter_played_inverted">Not played</string>
+
     <string name="form_description">Description</string>
     <string name="form_name">Name</string>
 
@@ -91,6 +108,10 @@
     <string name="notifications_new_podcast_episodes_channel_description">Get notified when a subscribed podcast publishes a new episode</string>
     <string name="notifications_new_podcast_episodes_channel_name">New Podcast Episodes</string>
     <string name="notifications_new_podcast_episodes_title">New Episode on » %1$s «</string>
+
+    <string name="orderby_date">Date</string>
+    <string name="orderby_duration">Duration</string>
+    <string name="orderby_title">Title</string>
 
     <string name="route_add_podcast">Add podcast</string>
     <string name="route_continue_playing">Continue playing</string>
@@ -134,6 +155,10 @@
     <string name="route_new_episodes">New episodes</string>
     <string name="route_new_episodes_empty_text">You\'ve seen everything! Take a break, or head over to Discover to find your next favorite voice.</string>
     <string name="route_new_episodes_empty_title">You\'re all up to date</string>
+    <string name="route_podcast_empty_text">This podcast hasn\'t published any episodes. Check back later for new content.</string>
+    <string name="route_podcast_empty_title">No episodes yet</string>
+    <string name="route_podcast_search_empty_text">Try a different search or adjust your filters.</string>
+    <string name="route_podcast_search_empty_title">No matches found</string>
     <string name="route_podcast_settings">Podcast settings</string>
     <string name="route_restore">Restore from Backup</string>
     <string name="route_restore_action_restart_app">Restart app</string>

@@ -4,11 +4,42 @@ import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.RawQuery
 import androidx.room.Transaction
 import androidx.room.Update
+import androidx.sqlite.db.SimpleSQLiteQuery
+import androidx.sqlite.db.SupportSQLiteQuery
 import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeBundle
+import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeDownloadModel
+import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeDownloadState
 import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeModel
+import app.podiumpodcasts.podium.api.db.model.PodcastEpisodePlayStateModel
 import kotlinx.coroutines.flow.Flow
+
+enum class PodcastEpisodesOrder(
+    val value: String
+) {
+    ASCENDING("ASC"),
+    DESCENDING("DESC")
+}
+
+enum class PodcastEpisodesOrderBy(
+    val value: String
+) {
+    DATE("e.pubDate"),
+    TITLE("e.title"),
+    DURATION("e.duration")
+}
+
+enum class PodcastEpisodesFilter(
+    val condition: String
+) {
+    PLAYED("p.played = 1"),
+    PAUSED("p.played = 0 AND p.state > 0"),
+    NEW("e.new = 1"),
+    FAVORITE("EXISTS(SELECT 1 FROM listItem WHERE contentId = e.id AND listId = -2)"),
+    DOWNLOADED("COALESCE(d.state, 0) = ${PodcastEpisodeDownloadState.DOWNLOADED.value}")
+}
 
 @Dao
 interface PodcastEpisodeDao {
@@ -16,8 +47,48 @@ interface PodcastEpisodeDao {
     @Query("SELECT * FROM podcastEpisode WHERE origin=:origin ORDER BY pubDate DESC")
     fun all(origin: String): Flow<List<PodcastEpisodeBundle>>
 
-    @Query("SELECT * FROM podcastEpisode WHERE origin=:origin ORDER BY pubDate DESC")
-    fun allPaged(origin: String): PagingSource<Int, PodcastEpisodeBundle>
+    @RawQuery(
+        observedEntities = [
+            PodcastEpisodeModel::class,
+            PodcastEpisodePlayStateModel::class,
+            PodcastEpisodeDownloadModel::class
+        ]
+    )
+    fun queryPaged(query: SupportSQLiteQuery): PagingSource<Int, PodcastEpisodeBundle>
+
+    fun buildQuery(
+        origin: String,
+        searchQuery: String?,
+        orderBy: PodcastEpisodesOrderBy,
+        order: PodcastEpisodesOrder,
+        filter: Set<PodcastEpisodesFilter>,
+        filterNot: Set<PodcastEpisodesFilter>
+    ): SimpleSQLiteQuery {
+        val builder = StringBuilder(
+            """
+            SELECT e.* FROM podcastEpisode AS e
+            LEFT JOIN podcastEpisodePlayState AS p ON e.id = p.episodeId
+            LEFT JOIN podcastEpisodeDownload AS d ON e.id = d.episodeId
+            WHERE e.origin = ?
+        """.trimIndent()
+        )
+
+        val bindArgs = mutableListOf<Any>(origin)
+
+        if(!searchQuery.isNullOrBlank()) {
+            builder.append(" AND (e.title LIKE ? OR e.description LIKE ?)")
+
+            val wildcard = "%$searchQuery%"
+            bindArgs.add(wildcard)
+            bindArgs.add(wildcard)
+        }
+
+        filter.forEach { builder.append(" AND ${it.condition}") }
+        filterNot.forEach { builder.append(" AND NOT( ${it.condition} )") }
+
+        builder.append(" ORDER BY ${orderBy.value} ${order.value}")
+        return SimpleSQLiteQuery(builder.toString(), bindArgs.toTypedArray())
+    }
 
     @Transaction
     @Query("SELECT * FROM podcastEpisode WHERE origin=:origin ORDER BY pubDate DESC")
