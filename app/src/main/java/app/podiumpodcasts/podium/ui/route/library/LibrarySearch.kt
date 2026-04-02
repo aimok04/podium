@@ -36,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import app.podiumpodcasts.podium.R
 import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeModel
 import app.podiumpodcasts.podium.ui.component.common.CommonSearchInputField
@@ -188,7 +189,8 @@ private fun SearchContent(
                                             )
                                         ) {
                                             items(
-                                                podcastsPager.itemCount
+                                                podcastsPager.itemCount,
+                                                key = podcastsPager.itemKey { it.origin }
                                             ) {
                                                 podcastsPager[it]?.let { podcast ->
                                                     PodcastCard(
@@ -207,7 +209,7 @@ private fun SearchContent(
 
                                 items(
                                     count = episodesPager.itemCount,
-                                    key = { episodesPager[it]?.episode?.id ?: -it }
+                                    key = episodesPager.itemKey { it.episode.id }
                                 ) { index ->
                                     episodesPager[index]?.let { bundle ->
                                         PodcastEpisodeListItem(

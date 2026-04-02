@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import app.podiumpodcasts.podium.R
 import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeBundle
 import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeDownloadState
@@ -112,9 +113,7 @@ fun DownloadsRoute(
             ) {
                 items(
                     count = pager.itemCount,
-                    key = { index ->
-                        pager[index]?.episode?.id ?: -index
-                    }
+                    key = pager.itemKey { it.episode.id }
                 ) {
                     val bundle = pager[it] ?: return@items
 

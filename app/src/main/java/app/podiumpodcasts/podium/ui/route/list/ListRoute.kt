@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import app.podiumpodcasts.podium.R
 import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeModel
 import app.podiumpodcasts.podium.ui.component.common.BackButton
@@ -151,7 +152,7 @@ fun ListRoute(
 
                 items(
                     count = items.itemCount,
-                    key = { items[it]?.listItem?.id ?: -it }
+                    key = items.itemKey { it.listItem.id }
                 ) { index ->
                     val item = items[index] ?: return@items
 

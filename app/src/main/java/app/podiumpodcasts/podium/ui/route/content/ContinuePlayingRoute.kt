@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import app.podiumpodcasts.podium.R
 import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeModel
 import app.podiumpodcasts.podium.ui.component.common.BackButton
@@ -91,7 +92,7 @@ fun ContinuePlayingRoute(
             ) {
                 items(
                     continuePlaying.itemCount,
-                    key = { continuePlaying[it]?.episode?.id ?: -it }
+                    key = continuePlaying.itemKey { it }
                 ) {
                     val item = continuePlaying[it] ?: return@items
 
