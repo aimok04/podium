@@ -600,7 +600,8 @@ fun LazyListScope.podcastDetailViewEpisodesDestination(
             Modifier
                 .background(MaterialTheme.colorScheme.surfaceContainer)
                 .padding(16.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .animateItem(),
             state = vm.searchFilterOrderBarState
         )
     }
@@ -609,7 +610,9 @@ fun LazyListScope.podcastDetailViewEpisodesDestination(
         val isSearchFilterOrderBarStateDefault by vm.searchFilterOrderBarState.isDefault()
 
         if(episodePager.itemCount == 0 && episodePager.loadState.isIdle) InfoLayout(
-            modifier = Modifier.heightIn(min = 200.dp),
+            modifier = Modifier
+                .heightIn(min = 200.dp)
+                .animateItem(),
             icon = when(isSearchFilterOrderBarStateDefault) {
                 true -> Icons.Rounded.Inbox
                 false -> Icons.Rounded.SearchOff
