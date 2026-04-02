@@ -7,6 +7,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -22,6 +23,8 @@ object SettingsKeys {
     val APPEARANCE_USE_ALTERNATIVE_BRANDING =
         booleanPreferencesKey("appearance_use_alternative_branding")
 
+    val BEHAVIOR_PLAYER_PLAYBACK_SPEED =
+        floatPreferencesKey("behavior_player_playback_speed")
     val BEHAVIOR_DISCOVER_COUNTRY_CODE =
         stringPreferencesKey("behavior_discover_country_code")
     val BEHAVIOR_PLAYER_SEEK_BACK_INCREMENT =
@@ -104,6 +107,15 @@ class SettingsRepository(val context: Context) {
     }
 
     inner class Behavior {
+        val playerPlaybackSpeed: Flow<Float> = dataStore.data
+            .map { preferences ->
+                preferences[SettingsKeys.BEHAVIOR_PLAYER_PLAYBACK_SPEED] ?: 1f
+            }
+
+        suspend fun setPlayerPlaybackSpeed(speed: Float) = dataStore.edit { preferences ->
+            preferences[SettingsKeys.BEHAVIOR_PLAYER_PLAYBACK_SPEED] = speed
+        }
+
         fun getDiscoverCountryCode(default: String): Flow<String> {
             return dataStore.data.map { preferences ->
                 preferences[SettingsKeys.BEHAVIOR_DISCOVER_COUNTRY_CODE]
