@@ -35,6 +35,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -233,6 +234,17 @@ fun AddPodcastView(
 
                     Spacer(Modifier.height(96.dp))
 
+                    val enableButton = remember { mutableStateOf(false) }
+                    LaunchedEffect(vm.seedColor) {
+                        if(vm.seedColor == null) {
+                            enableButton.value = false
+                            delay(2000)
+                            enableButton.value = true
+                        } else {
+                            enableButton.value = true
+                        }
+                    }
+
                     DynamicMaterialExpressiveTheme(
                         seedColor = vm.seedColor
                             ?: MaterialTheme.colorScheme.primary
@@ -244,7 +256,7 @@ fun AddPodcastView(
                                     widthOption = IconButtonDefaults.IconButtonWidthOption.Wide
                                 )
                             ),
-                            enabled = vm.seedColor != null,
+                            enabled = enableButton.value,
                             shapes = IconButtonDefaults.shapes(
                                 shape = IconButtonDefaults.largeSquareShape,
                                 pressedShape = IconButtonDefaults.largePressedShape,
