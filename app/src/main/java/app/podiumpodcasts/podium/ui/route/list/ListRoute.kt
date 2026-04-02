@@ -129,10 +129,10 @@ fun ListRoute(
                 InfoLayout(
                     modifier = Modifier.padding(inset),
                     icon = Icons.AutoMirrored.Rounded.PlaylistAdd,
-                    title = { "Empty list" },
+                    title = { stringResource(R.string.route_list_empty_title) },
                 ) {
                     Text(
-                        text = "No episodes or podcasts have been added to this collection yet.",
+                        text = stringResource(R.string.route_list_empty_text),
                         textAlign = TextAlign.Center
                     )
                 }

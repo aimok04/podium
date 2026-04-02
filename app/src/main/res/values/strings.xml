@@ -128,6 +128,8 @@
     <string name="route_library_search_text">Type a title and press enter to filter your collection.</string>
     <string name="route_library_search_title">Search your library</string>
     <string name="route_licenses">Licenses</string>
+    <string name="route_list_empty_text">No episodes or podcasts have been added to this collection yet.</string>
+    <string name="route_list_empty_title">Empty list</string>
     <string name="route_locally_available">Locally available</string>
     <string name="route_new_episodes">New episodes</string>
     <string name="route_new_episodes_empty_text">You\'ve seen everything! Take a break, or head over to Discover to find your next favorite voice.</string>
