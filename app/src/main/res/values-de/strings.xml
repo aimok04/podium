@@ -25,6 +25,7 @@
     <string name="common_action_remove_from_favorites">Aus Favoriten entfernen</string>
     <string name="common_action_remove_from_queue">Aus Warteschlange entfernen</string>
     <string name="common_action_save">Speichern</string>
+    <string name="common_action_scroll_to_top">Zum Anfang springen</string>
     <string name="common_action_seek_back">Zurückspulen</string>
     <string name="common_action_seek_forward">Vorspulen</string>
     <string name="common_action_select_country_code">Ländercode auswählen</string>
@@ -36,21 +37,26 @@
     <string name="common_action_wait">Warten</string>
     <string name="common_action_yes">Ja</string>
     <string name="common_are_you_sure">Bist du sicher?</string>
+    <string name="common_ascending">Aufsteigend</string>
     <string name="common_audio_file">Audiodatei</string>
     <string name="common_author">Autor</string>
     <string name="common_confirmation">Bestätigung</string>
     <string name="common_cover_image">Coverbild</string>
     <string name="common_data_usage_per_update">Datenverbrauch pro Update</string>
+    <string name="common_descending">Absteigend</string>
     <string name="common_done">Fertig</string>
     <string name="common_downloaded">Heruntergeladen</string>
     <string name="common_downloaded_at">Heruntergeladen</string>
     <string name="common_downloading">Wird heruntergeladen…</string>
     <string name="common_duration">Dauer</string>
     <string name="common_episodes">Episoden</string>
+    <string name="common_filter">Filter</string>
     <string name="common_guid">ID (GUID)</string>
     <string name="common_info">Info</string>
     <string name="common_language_code">Sprachcode</string>
+    <string name="common_negative">Negativ</string>
     <string name="common_new_uppercase">NEU</string>
+    <string name="common_order_by">Sortieren nach</string>
     <string name="common_playback_speed">Geschwindigkeit</string>
     <string name="common_queue">Warteschlange</string>
     <string name="common_rss_feed">Quelle (RSS-Feed)</string>
@@ -74,6 +80,17 @@
     <string name="dialog_delete_confirmation_text">Möchtest du » %1$s « wirklich löschen?</string>
     <string name="dialog_edit_list_title">Liste bearbeiten</string>
 
+    <string name="filter_downloaded">Heruntergeladen</string>
+    <string name="filter_downloaded_inverted">Nicht heruntergeladen</string>
+    <string name="filter_favorite">Favoritisiert</string>
+    <string name="filter_favorite_inverted">Nicht favoritisiert</string>
+    <string name="filter_new">Neu</string>
+    <string name="filter_new_inverted">Nicht neu</string>
+    <string name="filter_paused">Pausiert</string>
+    <string name="filter_paused_inverted">Nicht pausiert</string>
+    <string name="filter_played">Gehört</string>
+    <string name="filter_played_inverted">Nicht gehört</string>
+
     <string name="form_description">Beschreibung</string>
     <string name="form_name">Name</string>
 
@@ -91,6 +108,10 @@
     <string name="notifications_new_podcast_episodes_channel_description">Benachrichtigung bei neuen Episoden abonnierter Podcasts</string>
     <string name="notifications_new_podcast_episodes_channel_name">Neue Podcast-Episoden</string>
     <string name="notifications_new_podcast_episodes_title">Neue Episode bei » %1$s «</string>
+
+    <string name="orderby_date">Datum</string>
+    <string name="orderby_duration">Dauer</string>
+    <string name="orderby_title">Titel</string>
 
     <string name="route_add_podcast">Podcast hinzufügen</string>
     <string name="route_continue_playing">Weiterhören</string>
@@ -128,10 +149,16 @@
     <string name="route_library_search_text">Tippe einen Titel ein und drücke auf Enter um deine Kollektion zu durchsuchen.</string>
     <string name="route_library_search_title">Durchsuche deine Bibliothek</string>
     <string name="route_licenses">Lizenzen</string>
+    <string name="route_list_empty_text">Keine Episoden oder Podcasts wurden bisher zu dieser Kollektion hinzugefügt.</string>
+    <string name="route_list_empty_title">Leere Liste</string>
     <string name="route_locally_available">Lokal Verfügbar</string>
     <string name="route_new_episodes">Neue Episoden</string>
     <string name="route_new_episodes_empty_text">Du hast alles gesehen! Mach eine Pause oder gehe zum Entdecken-Tab um neue Podcasts zu finden.</string>
     <string name="route_new_episodes_empty_title">"Du bist auf dem neusten Stand "</string>
+    <string name="route_podcast_empty_text">Dieser Podcast hat bisher keine Episoden veröffentlicht. . Schaue später noch einmal vorbei.</string>
+    <string name="route_podcast_empty_title">Bisher keine Episoden</string>
+    <string name="route_podcast_search_empty_text">Versuche eine andere Suchanfrage oder passe deine Filter an.</string>
+    <string name="route_podcast_search_empty_title">Keine Treffer</string>
     <string name="route_podcast_settings">Podcast-Einstellungen</string>
     <string name="route_restore">Vom Backup wiederherstellen</string>
     <string name="route_restore_action_restart_app">App neustarten</string>
