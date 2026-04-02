@@ -92,7 +92,7 @@ fun ContinuePlayingRoute(
             ) {
                 items(
                     continuePlaying.itemCount,
-                    key = continuePlaying.itemKey { it }
+                    key = continuePlaying.itemKey { it.episode.id }
                 ) {
                     val item = continuePlaying[it] ?: return@items
 
