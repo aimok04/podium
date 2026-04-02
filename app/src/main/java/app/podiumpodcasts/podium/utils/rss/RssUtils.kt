@@ -60,7 +60,7 @@ fun RssItem.toPodcastEpisode(
         duration = itunesItemData?.duration?.let {
             parseItunesDuration(it)
         } ?: -1,
-        audioUrl = audio ?: "",
+        audioUrl = audio ?: video ?: "",
         podcastTitle = podcast.title,
         imageSeedColor = podcast.imageSeedColor,
         new = new
