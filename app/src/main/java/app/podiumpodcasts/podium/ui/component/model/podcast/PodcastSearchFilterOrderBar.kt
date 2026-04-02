@@ -74,6 +74,10 @@ fun PodcastSearchFilterOrderBar(
     val showOrderBottomSheet = remember { mutableStateOf(false) }
 
     val textValue = remember { mutableStateOf("") }
+    LaunchedEffect(state.searchQuery.value) {
+        textValue.value = state.searchQuery.value
+    }
+
     LaunchedEffect(textValue.value) {
         delay(300)
         state.searchQuery.value = textValue.value
