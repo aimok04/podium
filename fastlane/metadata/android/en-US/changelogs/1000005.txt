@@ -1,5 +1,3 @@
-Hey 👋
-
 This release contains some new features and two new languages:
 
 - Added search, filter, and order bar to episodes list (#15).
