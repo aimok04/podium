@@ -28,7 +28,6 @@
     <string name="common_action_scroll_to_top">Scorri in alto</string>
     <string name="common_action_seek_back">Riavvolgi</string>
     <string name="common_action_seek_forward">Avanza</string>
-    <string name="common_action_seek_forward">Avanza</string>
     <string name="common_action_select_country_code">Seleziona prefisso internazionale</string>
     <string name="common_action_select_file">Seleziona file</string>
     <string name="common_action_subscribe">Iscriviti</string>
