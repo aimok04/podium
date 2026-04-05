@@ -2,40 +2,24 @@ package app.podiumpodcasts.podium.ui.route.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AppRegistration
-import androidx.compose.material.icons.rounded.AutoDelete
-import androidx.compose.material.icons.rounded.AutoGraph
 import androidx.compose.material.icons.rounded.Balance
-import androidx.compose.material.icons.rounded.Bedtime
-import androidx.compose.material.icons.rounded.CleaningServices
-import androidx.compose.material.icons.rounded.Colorize
-import androidx.compose.material.icons.rounded.DataUsage
-import androidx.compose.material.icons.rounded.DeleteSweep
+import androidx.compose.material.icons.rounded.ColorLens
+import androidx.compose.material.icons.rounded.Construction
 import androidx.compose.material.icons.rounded.Download
-import androidx.compose.material.icons.rounded.ExploreOff
-import androidx.compose.material.icons.rounded.FileDownload
-import androidx.compose.material.icons.rounded.Notifications
-import androidx.compose.material.icons.rounded.Palette
-import androidx.compose.material.icons.rounded.Public
-import androidx.compose.material.icons.rounded.Publish
-import androidx.compose.material.icons.rounded.Replay
-import androidx.compose.material.icons.rounded.Restore
-import androidx.compose.material.icons.rounded.Save
-import androidx.compose.material.icons.rounded.SignalCellularAlt
-import androidx.compose.material.icons.rounded.Update
+import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.Storage
+import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VolunteerActivism
 import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material.icons.rounded.Work
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -51,7 +35,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -62,42 +45,30 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.OutOfQuotaPolicy
-import androidx.work.WorkManager
 import app.podiumpodcasts.podium.GITHUB_LINK
 import app.podiumpodcasts.podium.KOFI_LINK
 import app.podiumpodcasts.podium.R
-import app.podiumpodcasts.podium.background.work.DeletePlayedDownloadsWork
-import app.podiumpodcasts.podium.background.work.FixSeedColorsWork
-import app.podiumpodcasts.podium.background.worker.NightlyWorker
-import app.podiumpodcasts.podium.background.worker.PeriodicPodcastUpdateWorker
 import app.podiumpodcasts.podium.ui.component.common.BackButton
 import app.podiumpodcasts.podium.ui.component.settings.SettingsHeader
 import app.podiumpodcasts.podium.ui.component.settings.SettingsListItem
-import app.podiumpodcasts.podium.ui.component.settings.SettingsSecondsSliderListItem
-import app.podiumpodcasts.podium.ui.component.settings.SettingsSliderListItem
-import app.podiumpodcasts.podium.ui.component.settings.SettingsSwitchListItem
-import app.podiumpodcasts.podium.ui.custom.icons.Forward
-import app.podiumpodcasts.podium.ui.formatFileSize
 import app.podiumpodcasts.podium.ui.helper.LocalDatabase
 import app.podiumpodcasts.podium.ui.helper.LocalSettingsRepository
-import app.podiumpodcasts.podium.ui.vm.DeleteDownloadsAfterValues
-import app.podiumpodcasts.podium.ui.vm.ExportDatabaseState
-import app.podiumpodcasts.podium.ui.vm.MediaPlayerViewModel
+import app.podiumpodcasts.podium.ui.route.settings.pane.SettingsAppearanceKey
+import app.podiumpodcasts.podium.ui.route.settings.pane.SettingsBackgroundActivityKey
+import app.podiumpodcasts.podium.ui.route.settings.pane.SettingsDatabaseKey
+import app.podiumpodcasts.podium.ui.route.settings.pane.SettingsDebugKey
+import app.podiumpodcasts.podium.ui.route.settings.pane.SettingsDownloadsAndStorageKey
+import app.podiumpodcasts.podium.ui.route.settings.pane.SettingsPlaybackKey
+import app.podiumpodcasts.podium.ui.route.settings.pane.SettingsPrivacyKey
 import app.podiumpodcasts.podium.ui.vm.RoamingWarningDialogState
 import app.podiumpodcasts.podium.ui.vm.SettingsViewModel
-import app.podiumpodcasts.podium.ui.vm.UPDATE_PODCASTS_INTERVAL_VALUES
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsRoute(
     onLicenses: () -> Unit,
-    onRestore: () -> Unit,
-    onOpmlImport: () -> Unit,
+    onPane: (key: SettingsPaneKey) -> Unit,
     onBack: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -109,7 +80,6 @@ fun SettingsRoute(
     val uriHandler = LocalUriHandler.current
 
     val vm = viewModel { SettingsViewModel(db, settingsRepository) }
-    val mediaPlayerViewModel = viewModel<MediaPlayerViewModel>()
 
     val updatePodcastsIntervalMinutesState =
         vm.repository.behavior.updatePodcastsIntervalMinutes.collectAsState(60)
@@ -145,7 +115,6 @@ fun SettingsRoute(
             )
         }
     ) { inset ->
-        val downloadMetered = vm.repository.behavior.downloadMetered.collectAsState(false)
 
         LazyColumn(
             Modifier
@@ -236,54 +205,41 @@ fun SettingsRoute(
             }
 
             item {
-                SettingsHeader(
-                    label = stringResource(R.string.route_settings_database)
+                SettingsListItem(
+                    icon = {
+                        Icon(
+                            Icons.Rounded.ColorLens,
+                            stringResource(R.string.route_settings_appearance)
+                        )
+                    },
+
+                    label = stringResource(R.string.route_settings_appearance),
+
+                    index = 0,
+                    count = 6,
+
+                    onClick = {
+                        onPane(SettingsAppearanceKey())
+                    }
                 )
             }
 
             item {
-                val size = remember { vm.calculateDatabaseSize(context) ?: "" }
-
                 SettingsListItem(
                     icon = {
                         Icon(
-                            Icons.Rounded.DataUsage,
-                            stringResource(R.string.route_settings_database_storage_used)
+                            Icons.Rounded.PlayArrow,
+                            stringResource(R.string.route_settings_playback)
                         )
                     },
-                    label = stringResource(R.string.route_settings_database_storage_used),
-                    description = size,
-                    index = 0,
-                    count = 3
-                ) {
 
-                }
-            }
-
-            item {
-                val state = vm.exportDatabaseState.value
-
-                SettingsListItem(
-                    icon = {
-                        Icon(
-                            Icons.Rounded.Save,
-                            stringResource(R.string.route_settings_database_export)
-                        )
-                    },
-                    label = stringResource(R.string.route_settings_database_export),
-                    description = when(state) {
-                        is ExportDatabaseState.Writing -> "${state.fileName} ..."
-                        else -> stringResource(R.string.route_settings_database_export_description)
-                    },
+                    label = stringResource(R.string.route_settings_playback),
 
                     index = 1,
-                    count = 3,
+                    count = 6,
 
                     onClick = {
-                        vm.exportAndShareDatabase(
-                            context = context,
-                            title = context.getString(R.string.route_settings_database_export_share_title)
-                        )
+                        onPane(SettingsPlaybackKey())
                     }
                 )
             }
@@ -292,34 +248,19 @@ fun SettingsRoute(
                 SettingsListItem(
                     icon = {
                         Icon(
-                            Icons.Rounded.Restore,
-                            stringResource(R.string.route_settings_database_restore)
+                            Icons.Rounded.Storage,
+                            stringResource(R.string.route_settings_database_and_backup)
                         )
                     },
-                    label = stringResource(R.string.route_settings_database_restore),
-                    description = stringResource(
-                        R.string.route_settings_database_restore_description,
-                        stringResource(R.string.app_name)
-                    ),
+
+                    label = stringResource(R.string.route_settings_database_and_backup),
 
                     index = 2,
-                    count = 3,
+                    count = 6,
 
                     onClick = {
-                        onRestore()
+                        onPane(SettingsDatabaseKey())
                     }
-                )
-            }
-
-            item {
-                Spacer(
-                    Modifier.height(32.dp)
-                )
-            }
-
-            item {
-                SettingsHeader(
-                    label = stringResource(R.string.route_settings_import_export)
                 )
             }
 
@@ -327,21 +268,18 @@ fun SettingsRoute(
                 SettingsListItem(
                     icon = {
                         Icon(
-                            Icons.Rounded.Publish,
-                            stringResource(R.string.route_settings_import_export_export_as_opml)
+                            Icons.Rounded.Construction,
+                            stringResource(R.string.route_settings_background_activity)
                         )
                     },
-                    label = stringResource(R.string.route_settings_import_export_export_as_opml),
-                    description = stringResource(R.string.route_settings_import_export_export_as_opml_description),
 
-                    index = 0,
-                    count = 2,
+                    label = stringResource(R.string.route_settings_background_activity),
+
+                    index = 3,
+                    count = 6,
 
                     onClick = {
-                        vm.exportAndShareOpml(
-                            context = context,
-                            title = context.getString(R.string.route_settings_import_export_export_as_opml_share_title)
-                        )
+                        onPane(SettingsBackgroundActivityKey())
                     }
                 )
             }
@@ -351,646 +289,17 @@ fun SettingsRoute(
                     icon = {
                         Icon(
                             Icons.Rounded.Download,
-                            stringResource(R.string.route_settings_import_export_import_from_opml)
+                            stringResource(R.string.route_settings_downloads_and_storage)
                         )
                     },
-                    label = stringResource(R.string.route_settings_import_export_import_from_opml),
-                    description = stringResource(R.string.route_settings_import_export_import_from_opml_description),
 
-                    index = 1,
-                    count = 2,
-
-                    onClick = {
-                        onOpmlImport()
-                    }
-                )
-            }
-
-            item {
-                Spacer(Modifier.height(32.dp))
-            }
-
-            item {
-                SettingsHeader(
-                    label = stringResource(R.string.route_settings_appearance)
-                )
-            }
-
-            item {
-                val enableArtworkColors =
-                    vm.repository.appearance.enableArtworkColors.collectAsState(true)
-
-                SettingsSwitchListItem(
-                    checked = enableArtworkColors.value,
-                    onCheckedChange = {
-                        scope.launch {
-                            vm.repository.appearance.setEnableArtworkColors(it)
-                        }
-                    },
-
-                    icon = {
-                        Icon(
-                            Icons.Rounded.Colorize,
-                            stringResource(R.string.route_settings_appearance_enable_artwork_colors)
-                        )
-                    },
-                    label = stringResource(R.string.route_settings_appearance_enable_artwork_colors),
-                    description = stringResource(R.string.route_settings_appearance_enable_artwork_colors_description),
-
-                    index = 0,
-                    count = 2
-                )
-            }
-
-            item {
-                val useAlternativeBranding =
-                    vm.repository.appearance.useAlternativeBranding.collectAsState(true)
-
-                SettingsSwitchListItem(
-                    checked = useAlternativeBranding.value,
-                    onCheckedChange = {
-                        scope.launch {
-                            vm.repository.appearance.setUseAlternativeBranding(context, it)
-                        }
-                    },
-
-                    icon = {
-                        Icon(
-                            Icons.Rounded.AppRegistration,
-                            stringResource(R.string.route_settings_appearance_use_alternative_branding)
-                        )
-                    },
-                    label = stringResource(R.string.route_settings_appearance_use_alternative_branding),
-                    description = stringResource(R.string.route_settings_appearance_use_alternative_branding_description),
-
-                    index = 1,
-                    count = 2
-                )
-            }
-
-            item {
-                Spacer(Modifier.height(32.dp))
-            }
-
-            item {
-                SettingsHeader(
-                    label = stringResource(R.string.route_settings_player)
-                )
-            }
-
-            item {
-                val increment = vm.repository.behavior.playerSeekBackIncrement.collectAsState(10000)
-
-                val seconds = remember { mutableStateOf(10) }
-                LaunchedEffect(increment.value) { seconds.value = (increment.value / 1000).toInt() }
-
-                SettingsSecondsSliderListItem(
-                    icon = {
-                        Icon(
-                            Icons.Rounded.Replay,
-                            stringResource(R.string.route_settings_player_seek_back_increment)
-                        )
-                    },
-                    label = stringResource(R.string.route_settings_player_seek_back_increment),
-
-                    value = seconds.value,
-                    onValueChange = { seconds.value = it },
-
-                    min = 1,
-                    max = 120,
-
-                    onValueChangeFinished = {
-                        scope.launch {
-                            vm.repository.behavior.setPlayerSeekBackIncrement(seconds.value * 1000L)
-                            mediaPlayerViewModel.updateSeekBackIncrement(seconds.value * 1000L)
-                        }
-                    },
-
-                    index = 0,
-                    count = 2
-                )
-            }
-
-            item {
-                val increment =
-                    vm.repository.behavior.playerSeekForwardIncrement.collectAsState(10000)
-
-                val seconds = remember { mutableStateOf(10) }
-                LaunchedEffect(increment.value) { seconds.value = (increment.value / 1000).toInt() }
-
-                SettingsSecondsSliderListItem(
-                    icon = {
-                        Icon(
-                            Icons.Rounded.Forward,
-                            stringResource(R.string.route_settings_player_seek_forward_increment)
-                        )
-                    },
-                    label = stringResource(R.string.route_settings_player_seek_forward_increment),
-
-                    value = seconds.value,
-                    onValueChange = { seconds.value = it },
-
-                    min = 1,
-                    max = 120,
-
-                    onValueChangeFinished = {
-                        scope.launch {
-                            vm.repository.behavior.setPlayerSeekForwardIncrement(seconds.value * 1000L)
-                            mediaPlayerViewModel.updateSeekForwardIncrement(seconds.value * 1000L)
-                        }
-                    },
-
-                    index = 1,
-                    count = 2
-                )
-            }
-
-            item {
-                Spacer(Modifier.height(32.dp))
-            }
-
-            item {
-                SettingsHeader(
-                    label = stringResource(R.string.route_settings_background_activity)
-                )
-            }
-
-            item {
-                val updatePodcastsInRoaming =
-                    vm.repository.behavior.updatePodcastsInRoaming.collectAsState(false)
-
-                SettingsSwitchListItem(
-                    checked = updatePodcastsInRoaming.value,
-                    onCheckedChange = {
-                        if(it) {
-                            vm.roamingWarningDialogState.value =
-                                RoamingWarningDialogState.ShowUpdate
-                        } else {
-                            scope.launch {
-                                vm.repository.behavior.setUpdatePodcastsInRoaming(false)
-                                vm.requeueUpdates(context)
-                            }
-                        }
-                    },
-
-                    icon = {
-                        Icon(
-                            Icons.Rounded.Public,
-                            stringResource(R.string.route_settings_background_activity_allow_update_while_roaming)
-                        )
-                    },
-                    label = stringResource(R.string.route_settings_background_activity_allow_update_while_roaming),
-                    description = stringResource(R.string.route_settings_background_activity_allow_update_while_roaming_description),
-
-                    index = 0,
-                    count = 2
-                )
-            }
-
-            item {
-                SettingsSliderListItem(
-                    icon = {
-                        Icon(
-                            Icons.Rounded.SignalCellularAlt,
-                            stringResource(R.string.route_settings_background_activity_update_frequency)
-                        )
-                    },
-                    label = stringResource(R.string.route_settings_background_activity_update_frequency),
-
-                    value = vm.updatePodcastsIntervalMinutesSliderState.floatValue,
-                    onValueChange = { vm.updateUpdatePodcastsIntervalMinutesSlider(it) },
-                    valueRange = 0f..(UPDATE_PODCASTS_INTERVAL_VALUES.size - 1).toFloat(),
-                    steps = UPDATE_PODCASTS_INTERVAL_VALUES.size - 1,
-
-                    onValueChangeFinished = {
-                        scope.launch {
-                            vm.repository.behavior.setUpdatePodcastsIntervalMinutes(
-                                vm.updatePodcastsIntervalMinutesTranslatedSliderState.intValue
-                            )
-                            vm.requeueUpdates(context)
-                        }
-                    },
-
-                    supportingContent = {
-                        Row(
-                            Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Absolute.SpaceBetween
-                        ) {
-                            vm.updatePodcastsIntervalMinutesTranslatedSliderState.intValue.let { state ->
-                                val hours = state / 60
-                                val minutes = state % 60
-
-                                Text(
-                                    text = if(hours > 0)
-                                        if(minutes > 0)
-                                            stringResource(
-                                                R.string.route_settings_background_activity_update_frequency_every_hours_mins,
-                                                hours,
-                                                minutes
-                                            )
-                                        else
-                                            stringResource(
-                                                R.string.route_settings_background_activity_update_frequency_every_hours,
-                                                hours
-                                            )
-                                    else
-                                        stringResource(
-                                            R.string.route_settings_background_activity_update_frequency_every_min,
-                                            minutes
-                                        )
-                                )
-
-                                vm.avgUpdateRunDataUsage.value?.let { avg ->
-                                    val updatesPerMonth = (1440 * 30) / state
-
-                                    Badge {
-                                        Text(
-                                            text = stringResource(
-                                                R.string.route_settings_background_activity_update_frequency_usage,
-                                                formatFileSize(updatesPerMonth.toLong() * avg)
-                                            )
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    },
-
-                    index = 1,
-                    count = 2
-                )
-            }
-
-            item {
-                Spacer(Modifier.height(32.dp))
-            }
-
-            item {
-                SettingsHeader(
-                    label = stringResource(R.string.route_settings_downloads_and_storage)
-                )
-            }
-
-            item {
-                SettingsSwitchListItem(
-                    checked = downloadMetered.value,
-                    onCheckedChange = {
-                        scope.launch {
-                            vm.repository.behavior.setDownloadMetered(it)
-                            vm.requeueDownloads(context, db)
-                        }
-                    },
-
-                    icon = {
-                        Icon(
-                            Icons.Rounded.SignalCellularAlt,
-                            stringResource(R.string.route_settings_downloads_and_storage_allow_mobile_downloads)
-                        )
-                    },
-                    label = stringResource(R.string.route_settings_downloads_and_storage_allow_mobile_downloads),
-                    description = stringResource(R.string.route_settings_downloads_and_storage_allow_mobile_downloads_description),
-
-                    index = 0,
-                    count = 3
-                )
-            }
-
-            item {
-                val downloadInRoaming =
-                    vm.repository.behavior.downloadInRoaming.collectAsState(false)
-
-                SettingsSwitchListItem(
-                    enabled = downloadMetered.value,
-
-                    checked = downloadInRoaming.value,
-                    onCheckedChange = {
-                        if(it) {
-                            vm.roamingWarningDialogState.value =
-                                RoamingWarningDialogState.ShowDownload
-                        } else {
-                            scope.launch {
-                                vm.repository.behavior.setDownloadInRoaming(false)
-                                vm.requeueDownloads(context, db)
-                            }
-                        }
-                    },
-
-                    icon = {
-                        Icon(
-                            Icons.Rounded.Public,
-                            stringResource(R.string.route_settings_downloads_and_storage_allow_while_roaming)
-                        )
-                    },
-                    label = stringResource(R.string.route_settings_downloads_and_storage_allow_while_roaming),
-                    description = stringResource(R.string.route_settings_downloads_and_storage_allow_while_roaming_description),
-                    index = 1,
-                    count = 3
-                )
-            }
-
-            item {
-                val applySettingsForAutoDownloads =
-                    vm.repository.behavior.applySettingsForAutoDownloads.collectAsState(false)
-
-                SettingsSwitchListItem(
-                    enabled = downloadMetered.value,
-
-                    checked = applySettingsForAutoDownloads.value,
-                    onCheckedChange = {
-                        scope.launch {
-                            vm.repository.behavior.setApplySettingsForAutoDownloads(it)
-                        }
-                    },
-
-                    icon = {
-                        Icon(
-                            Icons.Rounded.FileDownload,
-                            stringResource(R.string.route_settings_downloads_and_storage_include_automatic_downloads)
-                        )
-                    },
-                    label = stringResource(R.string.route_settings_downloads_and_storage_include_automatic_downloads),
-                    description = stringResource(R.string.route_settings_downloads_and_storage_include_automatic_downloads_description),
-
-                    index = 2,
-                    count = 3
-                )
-            }
-
-            item {
-                Spacer(Modifier.height(16.dp))
-            }
-
-            item {
-                val deletePlayedDownloads =
-                    vm.repository.behavior.deletePlayedDownloads.collectAsState(false)
-
-                SettingsSwitchListItem(
-                    checked = deletePlayedDownloads.value,
-                    onCheckedChange = {
-                        scope.launch {
-                            vm.repository.behavior.setDeletePlayedDownloads(it)
-                        }
-                    },
-
-                    icon = {
-                        Icon(
-                            Icons.Rounded.CleaningServices,
-                            stringResource(R.string.route_settings_downloads_and_storage_delete_played_downloads)
-                        )
-                    },
-                    label = stringResource(R.string.route_settings_downloads_and_storage_delete_played_downloads),
-                    description = stringResource(R.string.route_settings_downloads_and_storage_delete_played_downloads_description),
-
-                    index = 0,
-                    count = 2
-                )
-            }
-
-            item {
-                SettingsSliderListItem(
-                    icon = {
-                        Icon(
-                            Icons.Rounded.AutoDelete,
-                            stringResource(R.string.route_settings_downloads_and_storage_delete_downloads_after)
-                        )
-                    },
-                    label = stringResource(R.string.route_settings_downloads_and_storage_delete_downloads_after),
-
-                    value = vm.deleteDownloadsAfterSliderState.floatValue,
-                    onValueChange = { vm.updateDeleteDownloadsAfterSlider(it) },
-                    valueRange = 0f..(DeleteDownloadsAfterValues.entries.size - 1).toFloat(),
-                    steps = DeleteDownloadsAfterValues.entries.size - 2,
-
-                    onValueChangeFinished = {
-                        scope.launch {
-                            vm.repository.behavior.setDeleteDownloadsAfterSeconds(
-                                vm.deleteDownloadsAfterTranslatedSliderState.value.seconds
-                            )
-                        }
-                    },
-
-                    supportingContent = {
-                        Row(
-                            Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Absolute.SpaceBetween
-                        ) {
-                            vm.deleteDownloadsAfterTranslatedSliderState.value.let { state ->
-                                Text(
-                                    text = stringResource(state.label)
-                                )
-                            }
-                        }
-                    },
-
-                    index = 1,
-                    count = 2
-                )
-            }
-
-            item {
-                Spacer(Modifier.height(32.dp))
-            }
-
-            item {
-                SettingsHeader(
-                    stringResource(R.string.route_settings_privacy)
-                )
-            }
-
-            item {
-                val disableApplePodcastsApi =
-                    vm.repository.privacy.disableApplePodcastsApi.collectAsState(false)
-
-                SettingsSwitchListItem(
-                    checked = disableApplePodcastsApi.value,
-                    onCheckedChange = {
-                        scope.launch {
-                            vm.repository.privacy.setDisableApplePodcastsApi(it)
-                        }
-                    },
-
-                    icon = {
-                        Icon(Icons.Rounded.ExploreOff, "")
-                    },
-                    label = stringResource(R.string.route_settings_privacy_disable_apple_podcasts_api),
-                    description = stringResource(R.string.route_settings_privacy_disable_apple_podcasts_api_description),
-
-                    index = 0,
-                    count = 1
-                )
-            }
-
-            item {
-                Spacer(Modifier.height(32.dp))
-            }
-
-            item {
-                SettingsHeader(
-                    "Debug"
-                )
-            }
-
-            item {
-                val enableUpdateNotification =
-                    vm.repository.debug.enableUpdateNotification.collectAsState(false)
-
-                SettingsSwitchListItem(
-                    checked = enableUpdateNotification.value,
-                    onCheckedChange = {
-                        scope.launch {
-                            vm.repository.debug.setEnableUpdateNotification(it)
-                        }
-                    },
-
-                    icon = {
-                        Icon(Icons.Rounded.Notifications, "")
-                    },
-                    label = "Enable update notifications",
-                    description = "Receive debug notifications when periodic podcast updates run",
-
-                    index = 0,
-                    count = 2
-                )
-            }
-
-            item {
-                val enableNightlyNotification =
-                    vm.repository.debug.enableNightlyNotification.collectAsState(false)
-
-                SettingsSwitchListItem(
-                    checked = enableNightlyNotification.value,
-                    onCheckedChange = {
-                        scope.launch {
-                            vm.repository.debug.setEnableNightlyNotification(it)
-                        }
-                    },
-
-                    icon = {
-                        Icon(Icons.Rounded.Notifications, "")
-                    },
-                    label = "Enable nightly notifications",
-                    description = "Receive debug notifications when nightly tasks run",
-
-                    index = 1,
-                    count = 2
-                )
-            }
-
-            item {
-                Spacer(Modifier.height(16.dp))
-            }
-
-            item {
-                SettingsListItem(
-                    icon = {
-                        Icon(Icons.Rounded.Update, "")
-                    },
-                    label = "Run podcast update worker",
-                    description = "Fetch all podcast feeds for updates",
-
-                    index = 0,
-                    count = 3,
-
-                    onClick = {
-                        WorkManager.getInstance(context)
-                            .enqueueUniqueWork(
-                                uniqueWorkName = "PeriodicPodcastUpdateWorkerInstant",
-                                existingWorkPolicy = ExistingWorkPolicy.KEEP,
-                                request = OneTimeWorkRequestBuilder<PeriodicPodcastUpdateWorker>()
-                                    .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                                    .build()
-                            )
-                    }
-                )
-            }
-
-            item {
-                SettingsListItem(
-                    icon = {
-                        Icon(Icons.Rounded.Bedtime, "")
-                    },
-                    label = "Run nightly worker",
-                    description = "Run all nightly tasks",
-
-                    index = 1,
-                    count = 6,
-
-                    onClick = {
-                        WorkManager.getInstance(context)
-                            .enqueueUniqueWork(
-                                uniqueWorkName = "DailyWorker-Once",
-                                existingWorkPolicy = ExistingWorkPolicy.KEEP,
-                                request = OneTimeWorkRequestBuilder<NightlyWorker>()
-                                    .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                                    .build()
-                            )
-                    }
-                )
-            }
-
-            item {
-                SettingsListItem(
-                    icon = {
-                        Icon(Icons.Rounded.CleaningServices, "")
-                    },
-                    label = "Delete latest episodes",
-                    description = "Delete last episodes from each podcast",
-
-                    index = 2,
-                    count = 6,
-
-                    onClick = {
-                        scope.launch {
-                            val podcasts = db.podcasts().allSync()
-
-                            podcasts.forEach {
-                                val episodes = db.podcastEpisodes().all(it.origin).first()
-
-                                db.podcastEpisodes().delete(episodes.first().episode.id)
-                                db.podcastSubscriptions()
-                                    .storeCacheValues(it.origin, "", "", "")
-                            }
-                        }
-                    }
-                )
-            }
-
-            item {
-                SettingsListItem(
-                    icon = {
-                        Icon(Icons.Rounded.Palette, "")
-                    },
-                    label = "Fix seed colors",
-                    description = "Create seed colors for all podcasts",
-
-                    index = 3,
-                    count = 6,
-
-                    onClick = {
-                        scope.launch {
-                            val fix = FixSeedColorsWork(context, db)
-                            fix.doWork()
-                        }
-                    }
-                )
-            }
-
-            item {
-                SettingsListItem(
-                    icon = {
-                        Icon(Icons.Rounded.DeleteSweep, "")
-                    },
-                    label = "Delete all played downloads",
-                    description = "Run delete played downloads work",
+                    label = stringResource(R.string.route_settings_downloads_and_storage),
 
                     index = 4,
                     count = 6,
 
                     onClick = {
-                        scope.launch {
-                            val fix = DeletePlayedDownloadsWork(context, db)
-                            fix.doWork()
-                        }
+                        onPane(SettingsDownloadsAndStorageKey())
                     }
                 )
             }
@@ -998,23 +307,48 @@ fun SettingsRoute(
             item {
                 SettingsListItem(
                     icon = {
-                        Icon(Icons.Rounded.AutoGraph, "")
+                        Icon(
+                            Icons.Rounded.Visibility,
+                            stringResource(R.string.route_settings_privacy)
+                        )
                     },
-                    label = "Delete update podcast statistics",
-                    description = "This will reset the update podcast data usage estimate",
+
+                    label = stringResource(R.string.route_settings_privacy),
 
                     index = 5,
                     count = 6,
 
                     onClick = {
-                        scope.launch {
-                            db.statisticsUpdatePodcastRun().clear()
-                        }
+                        onPane(SettingsPrivacyKey())
+                    }
+                )
+            }
+
+            item {
+                Spacer(Modifier.height(32.dp))
+            }
+
+            item {
+                SettingsListItem(
+                    icon = {
+                        Icon(Icons.Rounded.Work, "Debug")
+                    },
+                    label = "Debug",
+                    onClick = {
+                        onPane(SettingsDebugKey())
                     }
                 )
             }
         }
     }
+}
+
+@Composable
+fun RoamingWarningDialog(vm: SettingsViewModel) {
+    val scope = rememberCoroutineScope()
+
+    val context = LocalContext.current
+    val db = LocalDatabase.current
 
     if(vm.roamingWarningDialogState.value != RoamingWarningDialogState.Hide) AlertDialog(
         onDismissRequest = {

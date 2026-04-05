@@ -17,9 +17,9 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsListItem(
-    icon: @Composable () -> Unit,
+    icon: (@Composable () -> Unit)? = null,
     label: String = "",
-    description: String = "",
+    description: String? = null,
 
     selected: Boolean = false,
     enabled: Boolean = true,
@@ -27,12 +27,14 @@ fun SettingsListItem(
     index: Int = 0,
     count: Int = 1,
 
-    leadingContent: @Composable () -> Unit = {
-        Box(
-            Modifier.padding(8.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            icon()
+    leadingContent: (@Composable () -> Unit)? = icon?.let {
+        {
+            Box(
+                Modifier.padding(8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                it()
+            }
         }
     },
     content: @Composable () -> Unit = {
@@ -40,10 +42,12 @@ fun SettingsListItem(
             text = label
         )
     },
-    supportingContent: @Composable (() -> Unit)? = {
-        Text(
-            text = description
-        )
+    supportingContent: @Composable (() -> Unit)? = description?.let {
+        {
+            Text(
+                text = it
+            )
+        }
     },
     trailingContent: @Composable (() -> Unit)? = null,
 

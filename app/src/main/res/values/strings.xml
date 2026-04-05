@@ -186,6 +186,7 @@
     <string name="route_settings_background_activity_update_frequency_every_min">every %1$d min</string>
     <string name="route_settings_background_activity_update_frequency_usage">%1$s / month</string>
     <string name="route_settings_database">Database</string>
+    <string name="route_settings_database_and_backup">Database and Backup</string>
     <string name="route_settings_database_export">Export database</string>
     <string name="route_settings_database_export_description">Backup all data except settings</string>
     <string name="route_settings_database_export_share_title">Save database export</string>
@@ -213,6 +214,7 @@
     <string name="route_settings_import_export_export_as_opml_share_title">Save .opml export</string>
     <string name="route_settings_import_export_import_from_opml">Import from .opml</string>
     <string name="route_settings_import_export_import_from_opml_description">Transfer your podcasts from another podcast app</string>
+    <string name="route_settings_playback">Playback</string>
     <string name="route_settings_player">Player</string>
     <string name="route_settings_player_seek_back_increment">Seek back increment</string>
     <string name="route_settings_player_seek_forward_increment">Seek forward increment</string>

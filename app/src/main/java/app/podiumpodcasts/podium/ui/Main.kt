@@ -40,6 +40,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import app.podiumpodcasts.podium.ui.component.common.SwitchableDynamicMaterialExpressiveTheme
 import app.podiumpodcasts.podium.ui.component.media.FloatingMediaPlayer
@@ -53,6 +55,8 @@ import app.podiumpodcasts.podium.ui.navigation.Home
 import app.podiumpodcasts.podium.ui.navigation.NavBarScaffold
 import app.podiumpodcasts.podium.ui.navigation.Navigation
 import app.podiumpodcasts.podium.ui.navigation.PodiumNavKey
+import app.podiumpodcasts.podium.ui.route.settings.SettingsPane
+import app.podiumpodcasts.podium.ui.route.settings.SettingsPaneKey
 import app.podiumpodcasts.podium.ui.view.model.PodcastDetailView
 import app.podiumpodcasts.podium.ui.view.model.PodcastEpisodeDetailView
 import app.podiumpodcasts.podium.ui.vm.MainViewModel
@@ -206,6 +210,24 @@ fun Main(
                             Navigation(
                                 backStack = backStack,
 
+                                onOpenPane = {
+                                    scope.launch {
+                                        listDetailNavigator.navigateTo(
+                                            pane = ThreePaneScaffoldRole.Primary,
+                                            contentKey = it
+                                        )
+                                    }
+                                },
+                                onClosePane = {
+                                    if(listDetailNavigator.canNavigateBack(BackNavigationBehavior.PopUntilScaffoldValueChange)) {
+                                        scope.launch {
+                                            listDetailNavigator.navigateBack(
+                                                BackNavigationBehavior.PopUntilScaffoldValueChange
+                                            )
+                                        }
+                                    }
+                                },
+
                                 onBack = {
                                     if(listDetailNavigator.canNavigateBack(BackNavigationBehavior.PopUntilScaffoldValueChange)) {
                                         listDetailBack()
@@ -241,7 +263,8 @@ fun Main(
                     detailPane = {
                         DetailPane(
                             vm = vm,
-                            scaffoldNavigator = listDetailNavigator
+                            scaffoldNavigator = listDetailNavigator,
+                            backStack = backStack
                         )
                     },
                     paneExpansionState = rememberPaneExpansionState(
@@ -294,7 +317,8 @@ fun Main(
 @Composable
 private fun ThreePaneScaffoldPaneScope.DetailPane(
     vm: MainViewModel,
-    scaffoldNavigator: ThreePaneScaffoldNavigator<DetailPaneKey>
+    scaffoldNavigator: ThreePaneScaffoldNavigator<DetailPaneKey>,
+    backStack: NavBackStack<NavKey>
 ) {
     val settingsRepository = LocalSettingsRepository.current
 
@@ -304,115 +328,136 @@ private fun ThreePaneScaffoldPaneScope.DetailPane(
     val scope = rememberCoroutineScope()
 
     scaffoldNavigator.currentDestination?.contentKey?.let { contentKey ->
-        if(contentKey is DetailPaneKey.PodcastKey) {
-            val podcast = vm.fetchPodcast(contentKey.origin)
-                .collectAsState(null)
-
-            podcast.value?.let { podcast ->
+        when(contentKey) {
+            is SettingsPaneKey -> {
                 AnimatedPane(
                     enterTransition = enterSpec,
                     exitTransition = exitSpec
                 ) {
-                    SwitchableDynamicMaterialExpressiveTheme(
-                        enable = enableArtworkColors.value,
-                        seedColor = Color(podcast.imageSeedColor)
+                    SettingsPane(
+                        contentKey,
+                        backStack,
+                        onClose = {
+                            scope.launch {
+                                scaffoldNavigator.navigateBack(BackNavigationBehavior.PopUntilScaffoldValueChange)
+                            }
+                        }
+                    )
+                }
+            }
+
+            is DetailPaneKey.PodcastKey -> {
+                val podcast = vm.fetchPodcast(contentKey.origin)
+                    .collectAsState(null)
+
+                podcast.value?.let { podcast ->
+                    AnimatedPane(
+                        enterTransition = enterSpec,
+                        exitTransition = exitSpec
                     ) {
-                        val displayBundle = remember { mutableStateOf(false) }
-                        val episodeId = remember { mutableStateOf<String?>(null) }
+                        SwitchableDynamicMaterialExpressiveTheme(
+                            enable = enableArtworkColors.value,
+                            seedColor = Color(podcast.imageSeedColor)
+                        ) {
+                            val displayBundle = remember { mutableStateOf(false) }
+                            val episodeId = remember { mutableStateOf<String?>(null) }
 
-                        val bundle = episodeId.value?.let {
-                            vm.fetchEpisode(it)
-                                .collectAsState(null)
-                        }
+                            val bundle = episodeId.value?.let {
+                                vm.fetchEpisode(it)
+                                    .collectAsState(null)
+                            }
 
-                        LaunchedEffect(contentKey, bundle?.value) {
-                            if(contentKey is DetailPaneKey.PodcastEpisodeKey)
-                                episodeId.value = contentKey.episodeId
+                            LaunchedEffect(contentKey, bundle?.value) {
+                                if(contentKey is DetailPaneKey.PodcastEpisodeKey)
+                                    episodeId.value = contentKey.episodeId
 
-                            displayBundle.value = bundle?.value != null
-                                    && contentKey is DetailPaneKey.PodcastEpisodeKey
-                        }
+                                displayBundle.value = bundle?.value != null
+                                        && contentKey is DetailPaneKey.PodcastEpisodeKey
+                            }
 
-                        AnimatedContent(
-                            targetState = displayBundle.value
-                        ) { isBundle ->
-                            when(isBundle) {
-                                false -> PodcastDetailView(
-                                    podcast = podcast,
-                                    onBack = {
-                                        scope.launch {
-                                            scaffoldNavigator.navigateBack(
-                                                backNavigationBehavior = BackNavigationBehavior.PopLatest
-                                            )
-                                        }
-                                    },
-                                    onClickEpisode = { episode ->
-                                        scope.launch {
-                                            scaffoldNavigator.navigateTo(
-                                                pane = ThreePaneScaffoldRole.Primary,
-                                                contentKey = DetailPaneKey.PodcastEpisodeKey(
-                                                    episodeOrigin = podcast.origin,
-                                                    episodeId = episode.id
+                            AnimatedContent(
+                                targetState = displayBundle.value
+                            ) { isBundle ->
+                                when(isBundle) {
+                                    false -> PodcastDetailView(
+                                        podcast = podcast,
+                                        onBack = {
+                                            scope.launch {
+                                                scaffoldNavigator.navigateBack(
+                                                    backNavigationBehavior = BackNavigationBehavior.PopLatest
                                                 )
-                                            )
+                                            }
+                                        },
+                                        onClickEpisode = { episode ->
+                                            scope.launch {
+                                                scaffoldNavigator.navigateTo(
+                                                    pane = ThreePaneScaffoldRole.Primary,
+                                                    contentKey = DetailPaneKey.PodcastEpisodeKey(
+                                                        episodeOrigin = podcast.origin,
+                                                        episodeId = episode.id
+                                                    )
+                                                )
+                                            }
                                         }
-                                    }
-                                )
+                                    )
 
-                                true -> PodcastEpisodeDetailView(
-                                    bundle = bundle!!.value!!,
-                                    parent = podcast,
-                                    onBack = {
-                                        scope.launch {
-                                            scaffoldNavigator.navigateBack(
-                                                backNavigationBehavior = BackNavigationBehavior.PopLatest
-                                            )
+                                    true -> PodcastEpisodeDetailView(
+                                        bundle = bundle!!.value!!,
+                                        parent = podcast,
+                                        onBack = {
+                                            scope.launch {
+                                                scaffoldNavigator.navigateBack(
+                                                    backNavigationBehavior = BackNavigationBehavior.PopLatest
+                                                )
+                                            }
                                         }
-                                    }
-                                )
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
-        } else if(contentKey is DetailPaneKey.EpisodeKey) {
-            val bundle = vm.fetchEpisode(contentKey.episodeId)
-                .collectAsState(null)
 
-            val podcast = vm.fetchPodcast(contentKey.episodeOrigin)
-                .collectAsState(null)
+            is DetailPaneKey.EpisodeKey -> {
+                val bundle = vm.fetchEpisode(contentKey.episodeId)
+                    .collectAsState(null)
 
-            bundle.value?.let { bundle ->
-                AnimatedPane(
-                    enterTransition = enterSpec,
-                    exitTransition = exitSpec
-                ) {
-                    SwitchableDynamicMaterialExpressiveTheme(
-                        enable = enableArtworkColors.value,
-                        seedColor = Color(bundle.episode.imageSeedColor)
+                val podcast = vm.fetchPodcast(contentKey.episodeOrigin)
+                    .collectAsState(null)
+
+                bundle.value?.let { bundle ->
+                    AnimatedPane(
+                        enterTransition = enterSpec,
+                        exitTransition = exitSpec
                     ) {
-                        PodcastEpisodeDetailView(
-                            bundle = bundle,
-                            parent = podcast.value,
-                            showParentLink = true,
-                            onShowParent = {
-                                scope.launch {
-                                    scaffoldNavigator.navigateTo(
-                                        pane = ThreePaneScaffoldRole.Primary,
-                                        contentKey = DetailPaneKey.PodcastKey(
-                                            origin = contentKey.episodeOrigin
+                        SwitchableDynamicMaterialExpressiveTheme(
+                            enable = enableArtworkColors.value,
+                            seedColor = Color(bundle.episode.imageSeedColor)
+                        ) {
+                            PodcastEpisodeDetailView(
+                                bundle = bundle,
+                                parent = podcast.value,
+                                showParentLink = true,
+                                onShowParent = {
+                                    scope.launch {
+                                        scaffoldNavigator.navigateTo(
+                                            pane = ThreePaneScaffoldRole.Primary,
+                                            contentKey = DetailPaneKey.PodcastKey(
+                                                origin = contentKey.episodeOrigin
+                                            )
                                         )
-                                    )
+                                    }
+                                },
+                                onBack = {
+                                    scope.launch {
+                                        scaffoldNavigator.navigateBack(
+                                            backNavigationBehavior = BackNavigationBehavior.PopLatest
+                                        )
+                                    }
                                 }
-                            },
-                            onBack = {
-                                scope.launch {
-                                    scaffoldNavigator.navigateBack(
-                                        backNavigationBehavior = BackNavigationBehavior.PopLatest
-                                    )
-                                }
-                            }
-                        )
+                            )
+                        }
                     }
                 }
             }

@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsSliderListItem(
-    icon: @Composable () -> Unit,
+    icon: (@Composable () -> Unit)? = null,
     label: String,
 
     value: Float,

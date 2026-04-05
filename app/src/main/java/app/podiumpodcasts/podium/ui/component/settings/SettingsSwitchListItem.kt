@@ -10,9 +10,9 @@ fun SettingsSwitchListItem(
     checked: Boolean,
     onCheckedChange: (newValue: Boolean) -> Unit,
 
-    icon: @Composable () -> Unit,
+    icon: (@Composable () -> Unit)? = null,
     label: String,
-    description: String,
+    description: String? = null,
 
     enabled: Boolean = true,
 

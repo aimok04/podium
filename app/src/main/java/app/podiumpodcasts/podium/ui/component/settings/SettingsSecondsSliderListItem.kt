@@ -15,7 +15,7 @@ import kotlin.math.roundToInt
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsSecondsSliderListItem(
-    icon: @Composable () -> Unit,
+    icon: (@Composable () -> Unit)? = null,
     label: String,
 
     value: Int,

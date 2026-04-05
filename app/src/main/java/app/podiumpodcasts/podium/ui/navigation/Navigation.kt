@@ -6,12 +6,14 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.ui.NavDisplay
 import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeModel
+import app.podiumpodcasts.podium.ui.DetailPaneKey
 import app.podiumpodcasts.podium.ui.route.add.AddPodcastRoute
 import app.podiumpodcasts.podium.ui.route.content.ContinuePlayingRoute
 import app.podiumpodcasts.podium.ui.route.content.LocallyAvailableRoute
@@ -69,13 +71,17 @@ data object Licenses : PodiumNavKey(showNavBar = false, showMediaPlayer = false)
 data object Restore : PodiumNavKey(showNavBar = false, showMediaPlayer = false)
 
 @Serializable
-data object OpmlImportingRoute : PodiumNavKey(showNavBar = false, showMediaPlayer = false)
+data object OpmlImporting : PodiumNavKey(showNavBar = false, showMediaPlayer = false)
 @Serializable
 data object Unknown : PodiumNavKey()
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun Navigation(
     backStack: NavBackStack<NavKey>,
+
+    onOpenPane: (key: DetailPaneKey) -> Unit,
+    onClosePane: () -> Unit,
 
     onBack: () -> Unit = { },
 
@@ -215,14 +221,13 @@ fun Navigation(
                         onLicenses = {
                             backStack.add(Licenses)
                         },
-                        onRestore = {
-                            backStack.clear()
-                            backStack.add(Restore)
-                        },
-                        onOpmlImport = {
-                            backStack.add(OpmlImportingRoute)
+                        onPane = {
+                            onOpenPane(
+                                it
+                            )
                         }
                     ) {
+                        onClosePane()
                         backStack.removeLastOrNull()
                     }
                 }
@@ -237,7 +242,7 @@ fun Navigation(
                     RestoreRoute()
                 }
 
-                is OpmlImportingRoute -> NavEntry(key) {
+                is OpmlImporting -> NavEntry(key) {
                     OpmlImportingRoute {
                         backStack.removeLastOrNull()
                     }
