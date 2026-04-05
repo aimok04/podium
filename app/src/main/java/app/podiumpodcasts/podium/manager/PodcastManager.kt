@@ -5,8 +5,8 @@ import androidx.compose.ui.graphics.toArgb
 import app.podiumpodcasts.podium.api.db.AppDatabase
 import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeModel
 import app.podiumpodcasts.podium.api.db.model.PodcastModel
-import app.podiumpodcasts.podium.ui.vm.AddPodcastState
-import app.podiumpodcasts.podium.utils.rss.buildPodiumRssParser
+import app.podiumpodcasts.podium.api.rss.FetchPodcastClient
+import app.podiumpodcasts.podium.api.rss.FetchPodcastClientResult
 import app.podiumpodcasts.podium.utils.rss.toPodcast
 import app.podiumpodcasts.podium.utils.rss.toPodcastEpisode
 
@@ -19,6 +19,8 @@ class PodcastManager(
     val db: AppDatabase
 ) {
 
+    private val fetchPodcastClient = FetchPodcastClient()
+
     suspend fun addPodcast(
         origin: String,
         seedColor: Color?
@@ -29,13 +31,13 @@ class PodcastManager(
             )
         }
 
-        var fileSize = 0L
-        val rssParser = buildPodiumRssParser { size -> fileSize = size }
+        val response = fetchPodcastClient.fetchNoCache(origin)
 
-        val rssChannel = rssParser.getRssChannel(origin)
+        if(response !is FetchPodcastClientResult.Success)
+            throw Exception(response.toString())
 
-        val podcast = rssChannel.toPodcast(origin, fileSize, null)
-        val episodes = rssChannel.items.map { it.toPodcastEpisode(podcast = podcast) }
+        val podcast = response.rssChannel.toPodcast(origin, response.fileSize, null)
+        val episodes = response.rssChannel.items.map { it.toPodcastEpisode(podcast = podcast) }
 
         return addPodcast(podcast, episodes, seedColor, false)
     }

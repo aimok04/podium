@@ -4,22 +4,8 @@ import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeModel
 import app.podiumpodcasts.podium.api.db.model.PodcastModel
 import app.podiumpodcasts.podium.ui.parseItunesDuration
 import app.podiumpodcasts.podium.ui.parsePubDate
-import app.podiumpodcasts.podium.utils.ContentSizeInterceptor
-import com.prof18.rssparser.RssParser
-import com.prof18.rssparser.RssParserBuilder
 import com.prof18.rssparser.model.RssChannel
 import com.prof18.rssparser.model.RssItem
-import okhttp3.OkHttpClient
-
-fun buildPodiumRssParser(
-    onSize: (size: Long) -> Unit
-): RssParser {
-    return RssParserBuilder(
-        callFactory = OkHttpClient.Builder()
-            .addInterceptor(ContentSizeInterceptor(onSize))
-            .build()
-    ).build()
-}
 
 fun RssChannel.toPodcast(
     origin: String,

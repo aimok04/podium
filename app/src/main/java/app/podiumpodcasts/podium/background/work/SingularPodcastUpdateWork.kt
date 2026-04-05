@@ -3,31 +3,34 @@ package app.podiumpodcasts.podium.background.work
 import android.content.Context
 import app.podiumpodcasts.podium.api.db.AppDatabase
 import app.podiumpodcasts.podium.api.db.model.PodcastModel
+import app.podiumpodcasts.podium.api.rss.FetchPodcastClient
+import app.podiumpodcasts.podium.api.rss.FetchPodcastClientResult
 import app.podiumpodcasts.podium.manager.DownloadManager
-import app.podiumpodcasts.podium.utils.rss.buildPodiumRssParser
 import app.podiumpodcasts.podium.utils.rss.toPodcast
 import app.podiumpodcasts.podium.utils.rss.toPodcastEpisode
-import com.prof18.rssparser.model.RssChannel
 
 class SingularPodcastUpdateWork(
     val context: Context,
     val db: AppDatabase
 ) {
 
+    private val fetchPodcastClient = FetchPodcastClient()
+
     suspend fun doWork(
         oldPodcast: PodcastModel
     ) {
         val episodeIds = db.podcastEpisodes().getEpisodeIds(oldPodcast.origin)
 
-        var fileSize = 0L
-        val rssParser = buildPodiumRssParser { size -> fileSize = size }
+        val response = fetchPodcastClient.fetchNoCache(oldPodcast.origin)
 
-        val rssChannel: RssChannel = rssParser.getRssChannel(oldPodcast.origin)
+        if(response !is FetchPodcastClientResult.Success)
+            throw Exception(response.toString())
 
-        val podcast = rssChannel.toPodcast(oldPodcast.origin, fileSize, oldPodcast)
+        val podcast =
+            response.rssChannel.toPodcast(oldPodcast.origin, response.fileSize, oldPodcast)
         db.podcasts().update(podcast)
 
-        val newEpisodes = rssChannel.items
+        val newEpisodes = response.rssChannel.items
             .filter { !episodeIds.contains("${podcast.origin}:${it.guid}") }
             .map { it.toPodcastEpisode(podcast = podcast, new = true) }
 

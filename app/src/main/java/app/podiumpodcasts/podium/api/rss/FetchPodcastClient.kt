@@ -48,29 +48,12 @@ class FetchPodcastClient(
 
             when(headRequest.status) {
                 HttpStatusCode.OK -> {
-                    val response = client.get(origin) {
-                        header(HttpHeaders.IfNoneMatch, eTag)
-                        header(HttpHeaders.IfModifiedSince, lastModified)
-                    }
-
-                    val bytes = response.bodyAsBytes()
-                    val string = bytes.decodeToString()
-
-                    when(response.status) {
-                        HttpStatusCode.OK -> {
-                            return FetchPodcastClientResult.Success(
-                                rssChannel = RssParser().parse(string),
-                                fileSize = bytes.size.toLong(),
-                                eTag = response.headers[HttpHeaders.ETag] ?: "",
-                                lastModified = response.headers[HttpHeaders.LastModified] ?: "",
-                                contentLength = newContentLength ?: ""
-                            )
-                        }
-
-                        HttpStatusCode.NotModified -> {
-                            return FetchPodcastClientResult.Unchanged("ETAG or LAST-MODIFIED get")
-                        }
-                    }
+                    return get(
+                        origin = origin,
+                        lastModified = lastModified,
+                        eTag = eTag,
+                        newContentLength = newContentLength
+                    )
                 }
 
                 HttpStatusCode.NotModified -> {
@@ -84,4 +67,46 @@ class FetchPodcastClient(
             return FetchPodcastClientResult.Failure(e)
         }
     }
+
+    private suspend fun get(
+        origin: String,
+        lastModified: String? = null,
+        eTag: String? = null,
+        newContentLength: String? = null
+    ): FetchPodcastClientResult {
+        val response = client.get(origin) {
+            header(HttpHeaders.IfNoneMatch, eTag)
+            header(HttpHeaders.IfModifiedSince, lastModified)
+        }
+
+        val bytes = response.bodyAsBytes()
+        val string = bytes.decodeToString()
+
+        when(response.status) {
+            HttpStatusCode.OK -> {
+                return FetchPodcastClientResult.Success(
+                    rssChannel = RssParser().parse(string),
+                    fileSize = bytes.size.toLong(),
+                    eTag = response.headers[HttpHeaders.ETag] ?: "",
+                    lastModified = response.headers[HttpHeaders.LastModified] ?: "",
+                    contentLength = newContentLength ?: ""
+                )
+            }
+
+            HttpStatusCode.NotModified -> {
+                return FetchPodcastClientResult.Unchanged("ETAG or LAST-MODIFIED get")
+            }
+        }
+
+        throw Exception("UNHANDLED STATUS CODE ${response.status}")
+    }
+
+    suspend fun fetchNoCache(
+        origin: String
+    ): FetchPodcastClientResult {
+        return get(
+            origin = origin
+        )
+    }
+
 }

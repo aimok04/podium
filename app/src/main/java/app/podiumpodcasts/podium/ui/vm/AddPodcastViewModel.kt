@@ -10,9 +10,10 @@ import app.podiumpodcasts.podium.api.apple.ApplePodcastClient
 import app.podiumpodcasts.podium.api.db.AppDatabase
 import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeModel
 import app.podiumpodcasts.podium.api.db.model.PodcastModel
+import app.podiumpodcasts.podium.api.rss.FetchPodcastClient
+import app.podiumpodcasts.podium.api.rss.FetchPodcastClientResult
 import app.podiumpodcasts.podium.manager.AddPodcastResult
 import app.podiumpodcasts.podium.manager.PodcastManager
-import app.podiumpodcasts.podium.utils.rss.buildPodiumRssParser
 import app.podiumpodcasts.podium.utils.rss.toPodcast
 import app.podiumpodcasts.podium.utils.rss.toPodcastEpisode
 import kotlinx.coroutines.launch
@@ -45,6 +46,7 @@ class AddPodcastViewModel(
 
     val podcastManager = PodcastManager(db)
 
+    val fetchPodcastClient = FetchPodcastClient()
     val applePodcastClient = ApplePodcastClient()
 
     var state by mutableStateOf<AddPodcastState>(AddPodcastState.Idle())
@@ -57,17 +59,18 @@ class AddPodcastViewModel(
             state = AddPodcastState.Loading()
 
             try {
-                var fileSize = 0L
-                val rssParser = buildPodiumRssParser { size -> fileSize = size }
+                val response = fetchPodcastClient.fetchNoCache(origin)
 
-                val rssChannel = rssParser.getRssChannel(origin)
+                if(response !is FetchPodcastClientResult.Success)
+                    throw Exception(response.toString())
 
-                val podcast = rssChannel.toPodcast(origin, fileSize, null)
-                val episodes = rssChannel.items.map { it.toPodcastEpisode(podcast = podcast) }
+                val podcast = response.rssChannel.toPodcast(origin, response.fileSize, null)
+                val episodes =
+                    response.rssChannel.items.map { it.toPodcastEpisode(podcast = podcast) }
 
                 seedColor = null
                 state = AddPodcastState.Preview(
-                    imageUrl = rssChannel.image?.url ?: "",
+                    imageUrl = response.rssChannel.image?.url ?: "",
                     podcast = podcast,
                     episodes = episodes
                 )
