@@ -33,8 +33,11 @@ open class SettingsPaneKey : DetailPaneKey()
 
 @Composable
 fun SettingsPane(
+    showBackButton: Boolean,
+
     contentKey: SettingsPaneKey,
     backStack: NavBackStack<NavKey>,
+
     onClose: () -> Unit
 ) {
     BackHandler {
@@ -43,8 +46,7 @@ fun SettingsPane(
 
     @Composable
     fun NavigationIcon() {
-        // TODO: dynamic button
-        BackButton {
+        if(showBackButton) BackButton {
             onClose()
         }
     }

@@ -335,8 +335,10 @@ private fun ThreePaneScaffoldPaneScope.DetailPane(
                     exitTransition = exitSpec
                 ) {
                     SettingsPane(
-                        contentKey,
-                        backStack,
+                        showBackButton = scaffoldNavigator.scaffoldValue.secondary == PaneAdaptedValue.Hidden,
+
+                        contentKey = contentKey,
+                        backStack = backStack,
                         onClose = {
                             scope.launch {
                                 scaffoldNavigator.navigateBack(BackNavigationBehavior.PopUntilScaffoldValueChange)
