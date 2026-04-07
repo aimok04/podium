@@ -281,6 +281,9 @@ class PlaybackService : MediaLibraryService() {
                                 )
                         }
 
+                        val duration =
+                            mediaSession?.player?.duration?.let { (it / 1000L).toInt() } ?: 1
+
                         getOrigin()?.let { origin ->
                             getAudioUrl()?.let { audioUrl ->
                                 scope.launch {
@@ -289,8 +292,7 @@ class PlaybackService : MediaLibraryService() {
                                             origin = origin,
                                             episodeId = episodeId,
                                             audioUrl = audioUrl,
-                                            duration = mediaSession?.player?.duration?.let { (it / 1000L).toInt() }
-                                                ?: 1,
+                                            duration = duration,
                                             state = 0,
                                             played = true
                                         )
