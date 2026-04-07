@@ -59,9 +59,11 @@ fun SettingsPane(
                 },
 
                 onRestore = {
+                    onClose()
                     backStack.add(Restore)
                 },
                 onOpmlImport = {
+                    onClose()
                     backStack.add(OpmlImporting)
                 }
             )
