@@ -12,9 +12,7 @@ import app.podiumpodcasts.podium.background.work.DeleteOldDownloadsWork
 import app.podiumpodcasts.podium.background.work.DeletePlayedDownloadsWork
 import app.podiumpodcasts.podium.background.work.ProcessOrphanDownloadsWork
 import app.podiumpodcasts.podium.manager.DatabaseManager
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withContext
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 
@@ -29,6 +27,8 @@ class NightlyWorker(
     }
 
     override suspend fun doWork(): Result {
+        val settingsRepository = SettingsRepository(applicationContext)
+
         return try {
             DeleteOldDownloadsWork(applicationContext, db)
                 .doWork()
@@ -42,7 +42,10 @@ class NightlyWorker(
             db.statisticsUpdatePodcastRun()
                 .cleanUp()
 
-            val settingsRepository = SettingsRepository(applicationContext)
+            /* delete all sync actions if sync isn't enabled */
+            if(!settingsRepository.sync.enable.first())
+                db.syncActions().clear()
+
             if(settingsRepository.debug.enableNightlyNotification.first()) {
                 DebugNightlyNotification()
                     .send(applicationContext)

@@ -43,6 +43,17 @@ object SettingsKeys {
     val BEHAVIOR_DELETE_DOWNLOADS_AFTER_SECONDS =
         intPreferencesKey("behavior_delete_downloads_after_seconds")
 
+    val SYNC_ENABLE = booleanPreferencesKey("sync_enable")
+    val SYNC_TYPE = stringPreferencesKey("sync_type")
+    val SYNC_BASE_URL = stringPreferencesKey("sync_base_url")
+    val SYNC_DEVICE_CAPTION = stringPreferencesKey("sync_device_caption")
+    val SYNC_DEVICE_ID = stringPreferencesKey("sync_device_id")
+    val SYNC_USERNAME = stringPreferencesKey("sync_username")
+    val SYNC_PASSWORD = stringPreferencesKey("sync_password")
+    val SYNC_AUTH = stringPreferencesKey("sync_auth")
+    val SYNC_TIMESTAMP_SUBSCRIPTIONS = longPreferencesKey("sync_timestamp_subscriptions")
+    val SYNC_TIMESTAMP_EPISODE_ACTIONS = longPreferencesKey("sync_timestamp_episode_actions")
+
     val PRIVACY_DISABLE_APPLE_PODCASTS_API =
         booleanPreferencesKey("privacy_disable_apple_podcasts_api")
 
@@ -57,6 +68,7 @@ class SettingsRepository(val context: Context) {
 
     val appearance = Appearance()
     val behavior = Behavior()
+    val sync = Sync()
     val privacy = Privacy()
     val debug = Debug()
 
@@ -203,6 +215,88 @@ class SettingsRepository(val context: Context) {
 
         suspend fun setDeleteDownloadsAfterSeconds(seconds: Int) = dataStore.edit { preferences ->
             preferences[SettingsKeys.BEHAVIOR_DELETE_DOWNLOADS_AFTER_SECONDS] = seconds
+        }
+    }
+
+    inner class Sync {
+        val enable: Flow<Boolean> = dataStore.data.map { preferences ->
+            preferences[SettingsKeys.SYNC_ENABLE] ?: false
+        }
+
+        suspend fun setEnable(enable: Boolean) = dataStore.edit { preferences ->
+            preferences[SettingsKeys.SYNC_ENABLE] = enable
+        }
+
+        val type: Flow<String> = dataStore.data.map { preferences ->
+            preferences[SettingsKeys.SYNC_TYPE] ?: "gpodder"
+        }
+
+        suspend fun setType(type: String) = dataStore.edit { preferences ->
+            preferences[SettingsKeys.SYNC_TYPE] = type
+        }
+
+        val baseUrl: Flow<String> = dataStore.data.map { preferences ->
+            preferences[SettingsKeys.SYNC_BASE_URL] ?: "https://gpodder.net"
+        }
+
+        suspend fun setBaseUrl(baseUrl: String) = dataStore.edit { preferences ->
+            preferences[SettingsKeys.SYNC_BASE_URL] = baseUrl
+        }
+
+        val deviceId: Flow<String> = dataStore.data.map { preferences ->
+            preferences[SettingsKeys.SYNC_DEVICE_ID] ?: ""
+        }
+
+        suspend fun setDeviceId(deviceId: String) = dataStore.edit { preferences ->
+            preferences[SettingsKeys.SYNC_DEVICE_ID] = deviceId
+        }
+
+        val deviceCaption: Flow<String> = dataStore.data.map { preferences ->
+            preferences[SettingsKeys.SYNC_DEVICE_CAPTION] ?: ""
+        }
+
+        suspend fun setDeviceCaption(deviceCaption: String) = dataStore.edit { preferences ->
+            preferences[SettingsKeys.SYNC_DEVICE_CAPTION] = deviceCaption
+        }
+
+        val username: Flow<String> = dataStore.data.map { preferences ->
+            preferences[SettingsKeys.SYNC_USERNAME] ?: ""
+        }
+
+        suspend fun setUsername(username: String) = dataStore.edit { preferences ->
+            preferences[SettingsKeys.SYNC_USERNAME] = username
+        }
+
+        val password: Flow<String> = dataStore.data.map { preferences ->
+            preferences[SettingsKeys.SYNC_PASSWORD] ?: ""
+        }
+
+        suspend fun setPassword(password: String) = dataStore.edit { preferences ->
+            preferences[SettingsKeys.SYNC_PASSWORD] = password
+        }
+
+        val auth: Flow<String> = dataStore.data.map { preferences ->
+            preferences[SettingsKeys.SYNC_AUTH] ?: ""
+        }
+
+        suspend fun setAuth(auth: String) = dataStore.edit { preferences ->
+            preferences[SettingsKeys.SYNC_AUTH] = auth
+        }
+
+        val timestampSubscriptions: Flow<Long> = dataStore.data.map { preferences ->
+            preferences[SettingsKeys.SYNC_TIMESTAMP_SUBSCRIPTIONS] ?: 0L
+        }
+
+        suspend fun setTimestampSubscriptions(timestamp: Long) = dataStore.edit { preferences ->
+            preferences[SettingsKeys.SYNC_TIMESTAMP_SUBSCRIPTIONS] = timestamp
+        }
+
+        val timestampEpisodeActions: Flow<Long> = dataStore.data.map { preferences ->
+            preferences[SettingsKeys.SYNC_TIMESTAMP_EPISODE_ACTIONS] ?: 0L
+        }
+
+        suspend fun setTimestampEpisodeActions(timestamp: Long) = dataStore.edit { preferences ->
+            preferences[SettingsKeys.SYNC_TIMESTAMP_EPISODE_ACTIONS] = timestamp
         }
     }
 

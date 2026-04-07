@@ -15,6 +15,7 @@ import androidx.compose.material.icons.rounded.Construction
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Storage
+import androidx.compose.material.icons.rounded.Sync
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VolunteerActivism
 import androidx.compose.material.icons.rounded.Warning
@@ -49,6 +50,7 @@ import app.podiumpodcasts.podium.GITHUB_LINK
 import app.podiumpodcasts.podium.KOFI_LINK
 import app.podiumpodcasts.podium.R
 import app.podiumpodcasts.podium.ui.component.common.BackButton
+import app.podiumpodcasts.podium.ui.component.common.ExperimentalBadge
 import app.podiumpodcasts.podium.ui.component.settings.SettingsHeader
 import app.podiumpodcasts.podium.ui.component.settings.SettingsListItem
 import app.podiumpodcasts.podium.ui.helper.LocalDatabase
@@ -60,6 +62,7 @@ import app.podiumpodcasts.podium.ui.route.settings.pane.SettingsDebugKey
 import app.podiumpodcasts.podium.ui.route.settings.pane.SettingsDownloadsAndStorageKey
 import app.podiumpodcasts.podium.ui.route.settings.pane.SettingsPlaybackKey
 import app.podiumpodcasts.podium.ui.route.settings.pane.SettingsPrivacyKey
+import app.podiumpodcasts.podium.ui.route.settings.pane.SettingsSynchronizationKey
 import app.podiumpodcasts.podium.ui.vm.RoamingWarningDialogState
 import app.podiumpodcasts.podium.ui.vm.SettingsViewModel
 import kotlinx.coroutines.launch
@@ -71,8 +74,6 @@ fun SettingsRoute(
     onPane: (key: SettingsPaneKey) -> Unit,
     onBack: () -> Unit
 ) {
-    val scope = rememberCoroutineScope()
-
     val context = LocalContext.current
     val db = LocalDatabase.current
     val settingsRepository = LocalSettingsRepository.current
@@ -216,7 +217,7 @@ fun SettingsRoute(
                     label = stringResource(R.string.route_settings_appearance),
 
                     index = 0,
-                    count = 6,
+                    count = 7,
 
                     onClick = {
                         onPane(SettingsAppearanceKey())
@@ -236,7 +237,7 @@ fun SettingsRoute(
                     label = stringResource(R.string.route_settings_playback),
 
                     index = 1,
-                    count = 6,
+                    count = 7,
 
                     onClick = {
                         onPane(SettingsPlaybackKey())
@@ -256,7 +257,7 @@ fun SettingsRoute(
                     label = stringResource(R.string.route_settings_database_and_backup),
 
                     index = 2,
-                    count = 6,
+                    count = 7,
 
                     onClick = {
                         onPane(SettingsDatabaseKey())
@@ -276,7 +277,7 @@ fun SettingsRoute(
                     label = stringResource(R.string.route_settings_background_activity),
 
                     index = 3,
-                    count = 6,
+                    count = 7,
 
                     onClick = {
                         onPane(SettingsBackgroundActivityKey())
@@ -296,10 +297,34 @@ fun SettingsRoute(
                     label = stringResource(R.string.route_settings_downloads_and_storage),
 
                     index = 4,
-                    count = 6,
+                    count = 7,
 
                     onClick = {
                         onPane(SettingsDownloadsAndStorageKey())
+                    }
+                )
+            }
+
+            item {
+                SettingsListItem(
+                    icon = {
+                        Icon(
+                            Icons.Rounded.Sync,
+                            stringResource(R.string.route_settings_synchronization)
+                        )
+                    },
+
+                    label = stringResource(R.string.route_settings_synchronization),
+
+                    trailingContent = {
+                        ExperimentalBadge()
+                    },
+
+                    index = 5,
+                    count = 7,
+
+                    onClick = {
+                        onPane(SettingsSynchronizationKey())
                     }
                 )
             }
@@ -315,8 +340,8 @@ fun SettingsRoute(
 
                     label = stringResource(R.string.route_settings_privacy),
 
-                    index = 5,
-                    count = 6,
+                    index = 6,
+                    count = 7,
 
                     onClick = {
                         onPane(SettingsPrivacyKey())

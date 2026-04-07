@@ -19,6 +19,8 @@
     <string name="common_action_edit">Edit</string>
     <string name="common_action_enable_auto_download">Enable auto-download</string>
     <string name="common_action_expand">Expand</string>
+    <string name="common_action_login">Log in</string>
+    <string name="common_action_logout">Log out</string>
     <string name="common_action_mark_as_played">Mark as played</string>
     <string name="common_action_pause">Pause</string>
     <string name="common_action_play">Play</string>
@@ -50,13 +52,16 @@
     <string name="common_downloading">Downloading…</string>
     <string name="common_duration">Duration</string>
     <string name="common_episodes">Episodes</string>
+    <string name="common_experimental">Experimental</string>
     <string name="common_filter">Filter</string>
     <string name="common_guid">Id (Guid)</string>
     <string name="common_info">Info</string>
+    <string name="common_invalid_credentials">Invalid credentials</string>
     <string name="common_language_code">Language code</string>
     <string name="common_negative">Negative</string>
     <string name="common_new_uppercase">NEW</string>
     <string name="common_order_by">Order by</string>
+    <string name="common_password">Password</string>
     <string name="common_playback_speed">Speed</string>
     <string name="common_queue">Queue</string>
     <string name="common_rss_feed">Origin (rss feed)</string>
@@ -70,6 +75,7 @@
     <string name="common_state_played">Played</string>
     <string name="common_streaming">Streaming</string>
     <string name="common_url">URL</string>
+    <string name="common_username">Username</string>
     <string name="common_waiting">Waiting</string>
 
     <string name="dialog_artwork_not_analyzed_yet_text">The artwork colors weren\'t analyzed yet. If you continue, the dynamic color scheme won\'t apply for this podcast.</string>
@@ -223,6 +229,12 @@
     <string name="route_settings_privacy_disable_apple_podcasts_api_description">podium will no longer use the Apple Podcasts API if enabled</string>
     <string name="route_settings_roaming_warning_description">Using data on foreign networks can result in significant roaming charges from your carrier. Do you want to continue?</string>
     <string name="route_settings_roaming_warning_title">Caution</string>
+    <string name="route_settings_synchronization">Synchronization</string>
+    <string name="route_settings_synchronization_base_url">Base Url</string>
+    <string name="route_settings_synchronization_enable">Enable synchronization</string>
+    <string name="route_settings_synchronization_full_synchronize">Run full synchronization</string>
+    <string name="route_settings_synchronization_last_synced">Last synced: %1$s</string>
+    <string name="route_settings_synchronization_synchronize_now">Synchronize now</string>
     <string name="route_subscriptions">Subscriptions</string>
 
     <string name="snackbar_added_to_hear_later">Added to » Hear later «</string>

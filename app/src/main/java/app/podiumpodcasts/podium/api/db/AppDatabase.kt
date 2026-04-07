@@ -12,6 +12,7 @@ import app.podiumpodcasts.podium.api.db.dao.PodcastEpisodeDownloadDao
 import app.podiumpodcasts.podium.api.db.dao.PodcastEpisodePlayStateDao
 import app.podiumpodcasts.podium.api.db.dao.PodcastHistoryDao
 import app.podiumpodcasts.podium.api.db.dao.PodcastSubscriptionDao
+import app.podiumpodcasts.podium.api.db.dao.SyncActionDao
 import app.podiumpodcasts.podium.api.db.dao.statistics.UpdatePodcastRunDao
 import app.podiumpodcasts.podium.api.db.model.ListItemModel
 import app.podiumpodcasts.podium.api.db.model.ListModel
@@ -21,6 +22,7 @@ import app.podiumpodcasts.podium.api.db.model.PodcastEpisodePlayStateModel
 import app.podiumpodcasts.podium.api.db.model.PodcastHistoryModel
 import app.podiumpodcasts.podium.api.db.model.PodcastModel
 import app.podiumpodcasts.podium.api.db.model.PodcastSubscriptionModel
+import app.podiumpodcasts.podium.api.db.model.SyncActionModel
 import app.podiumpodcasts.podium.api.db.model.statistics.UpdatePodcastRunModel
 
 @Database(
@@ -35,8 +37,10 @@ import app.podiumpodcasts.podium.api.db.model.statistics.UpdatePodcastRunModel
         ListModel::class,
         ListItemModel::class,
 
-        UpdatePodcastRunModel::class
-    ], version = 13
+        UpdatePodcastRunModel::class,
+
+        SyncActionModel::class
+    ], version = 15
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun podcasts(): PodcastDao
@@ -50,6 +54,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun listItems(): ListItemDao
 
     abstract fun statisticsUpdatePodcastRun(): UpdatePodcastRunDao
+
+    abstract fun syncActions(): SyncActionDao
 }
 
 val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -221,6 +227,33 @@ val MIGRATION_12_13 = object : Migration(12, 13) {
     }
 }
 
+val MIGRATION_13_14 = object : Migration(13, 14) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "ALTER TABLE `podcastEpisodePlayState` ADD COLUMN `lastUpdate` INTEGER NOT NULL DEFAULT 0"
+        )
+    }
+}
+
+val MIGRATION_14_15 = object : Migration(14, 15) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `syncAction` (
+                `id` TEXT NOT NULL, 
+                `actionType` TEXT NOT NULL, 
+                `origin` TEXT NOT NULL, 
+                `audioUrl` TEXT, 
+                `position` INTEGER, 
+                `total` INTEGER, 
+                `timestamp` INTEGER NOT NULL, 
+                PRIMARY KEY(`id`)
+            )
+        """.trimIndent()
+        )
+    }
+}
+
 val ALL_MIGRATIONS = arrayOf(
     MIGRATION_1_2,
     MIGRATION_2_3,
@@ -233,5 +266,7 @@ val ALL_MIGRATIONS = arrayOf(
     MIGRATION_9_10,
     MIGRATION_10_11,
     MIGRATION_11_12,
-    MIGRATION_12_13
+    MIGRATION_12_13,
+    MIGRATION_13_14,
+    MIGRATION_14_15
 )

@@ -13,6 +13,10 @@ fun MediaMetadata.getEpisodeId(): String {
     return extras?.getString(MediaMetadataExtra.EPISODE_ID.name)!!
 }
 
+fun MediaMetadata.getAudioUrl(): String {
+    return extras?.getString(MediaMetadataExtra.AUDIO_URL.name)!!
+}
+
 fun MediaMetadata.getImageSeedColor(): Int {
     return extras?.getInt(MediaMetadataExtra.IMAGE_SEED_COLOR.name)!!
 }
@@ -36,6 +40,10 @@ fun MediaItem.getOrigin(): String {
 
 fun MediaItem.getEpisodeId(): String {
     return mediaMetadata.getEpisodeId()
+}
+
+fun MediaItem.getAudioUrl(): String {
+    return mediaMetadata.getAudioUrl()
 }
 
 fun MediaItem.getImageSeedColor(): Int {

@@ -19,6 +19,7 @@ import java.io.File
 enum class MediaMetadataExtra {
     ORIGIN,
     EPISODE_ID,
+    AUDIO_URL,
     IMAGE_SEED_COLOR,
     RESUME_AT,
     IS_DOWNLOAD,
@@ -87,6 +88,7 @@ data class PodcastEpisodeModel(
                         Bundle().apply {
                             putString(MediaMetadataExtra.ORIGIN.name, origin)
                             putString(MediaMetadataExtra.EPISODE_ID.name, id)
+                            putString(MediaMetadataExtra.AUDIO_URL.name, audioUrl)
                             putInt(MediaMetadataExtra.IMAGE_SEED_COLOR.name, imageSeedColor)
                             putBoolean(MediaMetadataExtra.IS_DOWNLOAD.name, isDownload)
                             if(playState != null) putLong(

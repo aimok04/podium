@@ -113,6 +113,9 @@ interface PodcastEpisodeDao {
     @Query("SELECT * FROM podcastEpisode WHERE id=:id")
     suspend fun getSync(id: String): PodcastEpisodeBundle
 
+    @Query("SELECT * FROM podcastEpisode WHERE origin=:origin AND audioUrl=:audioUrl")
+    suspend fun getSyncByOriginAndAudioUrl(origin: String, audioUrl: String): PodcastEpisodeBundle?
+
     @Query(
         """
         SELECT * FROM podcastEpisode 

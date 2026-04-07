@@ -22,6 +22,7 @@ import app.podiumpodcasts.podium.api.db.dao.PodcastEpisodesOrderBy
 import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeBundle
 import app.podiumpodcasts.podium.api.db.model.PodcastModel
 import app.podiumpodcasts.podium.background.work.SingularPodcastUpdateWork
+import app.podiumpodcasts.podium.manager.SubscriptionManager
 import app.podiumpodcasts.podium.ui.component.model.podcast.PodcastSearchFilterOrderBarState
 import app.podiumpodcasts.podium.ui.view.model.Destinations
 import coil3.Image
@@ -46,6 +47,10 @@ class PodcastDetailViewModel(
     val db: AppDatabase,
     val podcast: PodcastModel
 ) : ViewModel() {
+
+    val subscriptionManager = SubscriptionManager(
+        db = db
+    )
 
     val searchFilterOrderBarState = PodcastSearchFilterOrderBarState()
 
@@ -127,35 +132,57 @@ class PodcastDetailViewModel(
 
     fun subscribe() {
         viewModelScope.launch {
-            db.podcastSubscriptions()
-                .subscribe(podcast.origin)
+            subscriptionManager.subscribe(podcast.origin)
         }
     }
 
     fun unsubscribe() {
         viewModelScope.launch {
-            db.podcastSubscriptions()
-                .unsubscribe(podcast.origin)
+            subscriptionManager.unsubscribe(podcast.origin)
         }
     }
 
     fun deletePodcast() {
         viewModelScope.launch {
+            if(db.podcastSubscriptions().getSync(podcast.origin) != null) {
+                subscriptionManager.unsubscribe(podcast.origin)
+            }
+
             db.podcasts().delete(podcast)
         }
     }
 
-    fun markAsPlayed(episode: PodcastEpisodeBundle) {
+    fun markAsPlayed(bundle: PodcastEpisodeBundle) {
         viewModelScope.launch {
             db.podcastEpisodePlayStates()
-                .savePlayed(episode.episode.id, true)
+                .savePlayed(bundle.episode.id, true)
+
+            db.syncActions()
+                .addPlayState(
+                    origin = bundle.episode.origin,
+                    episodeId = bundle.episode.id,
+                    audioUrl = bundle.episode.audioUrl,
+                    duration = bundle.episode.duration,
+                    state = bundle.playState?.state ?: 0,
+                    played = true
+                )
         }
     }
 
-    fun markAsUnplayed(episode: PodcastEpisodeBundle) {
+    fun markAsUnplayed(bundle: PodcastEpisodeBundle) {
         viewModelScope.launch {
             db.podcastEpisodePlayStates()
-                .savePlayed(episode.episode.id, false)
+                .savePlayed(bundle.episode.id, false)
+
+            db.syncActions()
+                .addPlayState(
+                    origin = bundle.episode.origin,
+                    episodeId = bundle.episode.id,
+                    audioUrl = bundle.episode.audioUrl,
+                    duration = bundle.episode.duration,
+                    state = bundle.playState?.state ?: 0,
+                    played = false
+                )
         }
     }
 

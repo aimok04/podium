@@ -1,5 +1,6 @@
 package app.podiumpodcasts.podium.ui
 
+import android.annotation.SuppressLint
 import android.os.Parcelable
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Animatable
@@ -92,6 +93,7 @@ val enterSpec = fadeIn(animationSpec = tween(220, delayMillis = 90)) +
 val exitSpec = fadeOut(animationSpec = tween(90))
 
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(
     ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3ExpressiveApi::class,
     ExperimentalMaterial3Api::class

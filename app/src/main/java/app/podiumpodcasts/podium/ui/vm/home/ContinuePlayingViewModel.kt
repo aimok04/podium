@@ -27,24 +27,52 @@ class ContinuePlayingViewModel(
         viewModelScope.launch {
             db.podcastEpisodePlayStates()
                 .savePlayed(item.episode.id, true)
+
+            db.syncActions()
+                .addPlayState(
+                    origin = item.episode.origin,
+                    episodeId = item.episode.id,
+                    audioUrl = item.episode.audioUrl,
+                    duration = item.episode.duration,
+                    state = item.playState.state,
+                    played = true
+                )
         }
     }
 
     fun resetPlayState(item: PodcastPlayStateBundle) {
         viewModelScope.launch {
             db.podcastEpisodePlayStates()
-                .savePlayed(item.episode.id, false)
-            db.podcastEpisodePlayStates()
-                .saveState(item.episode.id, 0)
+                .set(item.episode.id, 0, false)
+
+            db.syncActions()
+                .addPlayState(
+                    origin = item.episode.origin,
+                    episodeId = item.episode.id,
+                    audioUrl = item.episode.audioUrl,
+                    duration = item.episode.duration,
+                    state = 0,
+                    played = false
+                )
         }
     }
 
     fun setPlayState(item: PodcastPlayStateBundle, played: Boolean, state: Int) {
         viewModelScope.launch {
-            db.podcastEpisodePlayStates()
-                .savePlayed(item.episode.id, played)
-            db.podcastEpisodePlayStates()
-                .saveState(item.episode.id, state)
+            db.podcastEpisodePlayStates().set(
+                item.episode.id, state, played
+            )
+
+            db.syncActions()
+                .addPlayState(
+                    origin = item.episode.origin,
+                    episodeId = item.episode.id,
+                    audioUrl = item.episode.audioUrl,
+                    duration = item.episode.duration,
+                    state = state,
+                    played = played
+                )
+
         }
     }
 

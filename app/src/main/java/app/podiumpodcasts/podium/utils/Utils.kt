@@ -3,11 +3,37 @@ package app.podiumpodcasts.podium.utils
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
 import android.telephony.TelephonyManager
 import androidx.core.content.FileProvider
 import java.io.File
 import java.security.MessageDigest
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Locale
+
+fun unixSecondsToIso8601(seconds: Long): String? {
+    val instant = Instant.ofEpochSecond(seconds)
+    val utcDateTime = instant.atZone(ZoneId.of("UTC")).toLocalDateTime()
+
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+    return utcDateTime.format(formatter)
+}
+
+fun getFriendlyDeviceName(context: Context): String {
+    val userDefined =
+        Settings.Global.getString(context.contentResolver, Settings.Global.DEVICE_NAME)
+    if(!userDefined.isNullOrBlank()) return userDefined
+
+    val manufacturer = android.os.Build.MANUFACTURER.replaceFirstChar { it.uppercase() }
+    val model = android.os.Build.MODEL
+
+    return when(model.startsWith(manufacturer)) {
+        true -> model
+        false -> "$manufacturer $model"
+    }
+}
 
 fun getCountryCode(
     context: Context?

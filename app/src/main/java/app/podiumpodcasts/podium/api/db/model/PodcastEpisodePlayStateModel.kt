@@ -22,5 +22,7 @@ data class PodcastEpisodePlayStateModel(
     @ColumnInfo("state")
     val state: Int = 0,
     @ColumnInfo("played")
-    val played: Boolean = false
+    val played: Boolean = false,
+    @ColumnInfo("lastUpdate")
+    val lastUpdate: Long = 0L
 )

@@ -13,7 +13,6 @@ import androidx.compose.ui.res.stringResource
 import app.podiumpodcasts.podium.R
 import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeBundle
 import app.podiumpodcasts.podium.ui.helper.LocalDatabase
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -42,14 +41,32 @@ fun PodcastEpisodeMarkAsPlayedButton(
                 }
 
                 if(playState.played) {
-                    db.podcastEpisodePlayStates()
-                        .saveState(bundle.episode.id, 0)
+                    db.podcastEpisodePlayStates().set(
+                        bundle.episode.id, 0, false
+                    )
 
-                    db.podcastEpisodePlayStates()
-                        .savePlayed(bundle.episode.id, false)
+                    db.syncActions()
+                        .addPlayState(
+                            origin = bundle.episode.origin,
+                            episodeId = bundle.episode.id,
+                            audioUrl = bundle.episode.audioUrl,
+                            duration = bundle.episode.duration,
+                            state = 0,
+                            played = false
+                        )
                 } else {
                     db.podcastEpisodePlayStates()
                         .savePlayed(bundle.episode.id, true)
+
+                    db.syncActions()
+                        .addPlayState(
+                            origin = bundle.episode.origin,
+                            episodeId = bundle.episode.id,
+                            audioUrl = bundle.episode.audioUrl,
+                            duration = bundle.episode.duration,
+                            state = bundle.episode.duration,
+                            played = true
+                        )
                 }
             }
         },

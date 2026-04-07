@@ -20,9 +20,11 @@ import androidx.media3.session.SessionCommand
 import app.podiumpodcasts.podium.R
 import app.podiumpodcasts.podium.SettingsRepository
 import app.podiumpodcasts.podium.background.notification.NewPodcastEpisodeNotification
+import app.podiumpodcasts.podium.background.worker.sync.PartialSynchronizationWorker
 import app.podiumpodcasts.podium.manager.DatabaseManager
 import app.podiumpodcasts.podium.ui.DeepLink
 import app.podiumpodcasts.podium.ui.asPendingIntent
+import app.podiumpodcasts.podium.utils.getAudioUrl
 import app.podiumpodcasts.podium.utils.getEpisodeId
 import app.podiumpodcasts.podium.utils.getOrigin
 import app.podiumpodcasts.podium.utils.getResumeAt
@@ -197,7 +199,9 @@ class PlaybackService : MediaLibraryService() {
     }
 
     private fun updatePlayState() {
+        val origin = getOrigin() ?: return
         val episodeId = getEpisodeId() ?: return
+        val audioUrl = getAudioUrl() ?: return
         val currentPosition = mediaSession?.player?.currentPosition ?: return
         val duration = mediaSession?.player?.duration ?: return
 
@@ -206,8 +210,10 @@ class PlaybackService : MediaLibraryService() {
         val state = (currentPosition / 1000).toInt()
         val remainingSeconds = (duration / 1000) - (currentPosition / 1000)
 
+        val isPlayed = remainingSeconds < 90
+
         scope.launch {
-            if(remainingSeconds < 90) {
+            if(isPlayed) {
                 db.podcastEpisodePlayStates()
                     .savePlayed(
                         episodeId = episodeId,
@@ -219,6 +225,16 @@ class PlaybackService : MediaLibraryService() {
                 .saveState(
                     episodeId = episodeId,
                     state = state.coerceAtLeast(1)
+                )
+
+            db.syncActions()
+                .addPlayState(
+                    origin = origin,
+                    episodeId = episodeId,
+                    audioUrl = audioUrl,
+                    duration = (duration / 1000L).toInt(),
+                    state = state,
+                    played = isPlayed
                 )
         }
     }
@@ -241,6 +257,8 @@ class PlaybackService : MediaLibraryService() {
 
     private fun getEpisodeId() = mediaSession?.player?.currentMediaItem?.getEpisodeId()
 
+    private fun getAudioUrl() = mediaSession?.player?.currentMediaItem?.getAudioUrl()
+
     private fun registerPlayStateListener() {
         mediaSession?.player?.addListener(object : Player.Listener {
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
@@ -262,7 +280,26 @@ class PlaybackService : MediaLibraryService() {
                                     played = true
                                 )
                         }
+
+                        getOrigin()?.let { origin ->
+                            getAudioUrl()?.let { audioUrl ->
+                                scope.launch {
+                                    db.syncActions()
+                                        .addPlayState(
+                                            origin = origin,
+                                            episodeId = episodeId,
+                                            audioUrl = audioUrl,
+                                            duration = mediaSession?.player?.duration?.let { (it / 1000L).toInt() }
+                                                ?: 1,
+                                            state = 0,
+                                            played = true
+                                        )
+                                }
+                            }
+                        }
                     }
+
+                    syncIfEnabled()
                 }
 
                 super.onPlaybackStateChanged(playbackState)
@@ -277,6 +314,8 @@ class PlaybackService : MediaLibraryService() {
                 } else {
                     updatePlayStateHandler.removeCallbacks(updatePlayStateRunnable)
                     skipEndingHandler.removeCallbacks(skipEndingRunnable)
+
+                    syncIfEnabled()
                 }
 
                 super.onIsPlayingChanged(isPlaying)
@@ -350,6 +389,18 @@ class PlaybackService : MediaLibraryService() {
 
         sleepTimerRunnable.let { sleepTimerHandler.removeCallbacks(it) }
         sleepTimerHandler.postDelayed(sleepTimerRunnable, delay)
+    }
+
+    fun syncIfEnabled() {
+        scope.launch {
+            if(!settingsRepository.sync.enable.first())
+                return@launch
+
+            PartialSynchronizationWorker.enqueue(
+                context = this@PlaybackService,
+                debounceSeconds = 30L
+            )
+        }
     }
 
     override fun onDestroy() {

@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsListItem(
+    modifier: Modifier = Modifier,
+
     icon: (@Composable () -> Unit)? = null,
     label: String = "",
     description: String? = null,
@@ -55,9 +57,9 @@ fun SettingsListItem(
 ) {
     SegmentedListItem(
         modifier = if(count == 1)
-            Modifier.clip(RoundedCornerShape(16.dp))
+            modifier.clip(RoundedCornerShape(16.dp))
         else
-            Modifier,
+            modifier,
 
         selected = selected,
         enabled = enabled,
