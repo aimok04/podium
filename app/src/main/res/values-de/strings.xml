@@ -19,6 +19,7 @@
     <string name="common_action_edit">Bearbeiten</string>
     <string name="common_action_enable_auto_download">Auto-Download aktivieren</string>
     <string name="common_action_expand">Erweitern</string>
+    <string name="common_action_logout">Ausloggen</string>
     <string name="common_action_mark_as_played">Als gehört markieren</string>
     <string name="common_action_pause">Pause</string>
     <string name="common_action_play">Abspielen</string>
@@ -50,13 +51,16 @@
     <string name="common_downloading">Wird heruntergeladen…</string>
     <string name="common_duration">Dauer</string>
     <string name="common_episodes">Episoden</string>
+    <string name="common_experimental">Experimentell</string>
     <string name="common_filter">Filter</string>
     <string name="common_guid">ID (GUID)</string>
     <string name="common_info">Info</string>
+    <string name="common_invalid_credentials">Ungültige Anmeldedaten</string>
     <string name="common_language_code">Sprachcode</string>
     <string name="common_negative">Negativ</string>
     <string name="common_new_uppercase">NEU</string>
     <string name="common_order_by">Sortieren nach</string>
+    <string name="common_password">Passwort</string>
     <string name="common_playback_speed">Geschwindigkeit</string>
     <string name="common_queue">Warteschlange</string>
     <string name="common_rss_feed">Quelle (RSS-Feed)</string>
@@ -70,6 +74,7 @@
     <string name="common_state_played">Gehört</string>
     <string name="common_streaming">Streaming</string>
     <string name="common_url">URL</string>
+    <string name="common_username">Nutzername</string>
     <string name="common_waiting">Wartet</string>
 
     <string name="dialog_artwork_not_analyzed_yet_text">Die Farben des Covers wurden noch nicht analysiert. Wenn du fortfährst, wird das dynamische Farbschema für diesen Podcast nicht angewendet.</string>
@@ -186,6 +191,7 @@
     <string name="route_settings_background_activity_update_frequency_every_min">jede %1$d min</string>
     <string name="route_settings_background_activity_update_frequency_usage">%1$s pro Monat</string>
     <string name="route_settings_database">Datenbank</string>
+    <string name="route_settings_database_and_backup">Datenbank und Backup</string>
     <string name="route_settings_database_export">Datenbank exportieren</string>
     <string name="route_settings_database_export_description">Alle Daten außer die Einstellungen speichern</string>
     <string name="route_settings_database_export_share_title">Datenbank-Export speichern</string>
@@ -213,6 +219,7 @@
     <string name="route_settings_import_export_export_as_opml_share_title">Speichere .opml-Export</string>
     <string name="route_settings_import_export_import_from_opml">Importiere aus .opml</string>
     <string name="route_settings_import_export_import_from_opml_description">Transferiere deine Podcasts aus einer anderen Podcast-App</string>
+    <string name="route_settings_playback">Wiedergabe</string>
     <string name="route_settings_player">Player</string>
     <string name="route_settings_player_seek_back_increment">Rückspul-Schrittweite</string>
     <string name="route_settings_player_seek_forward_increment">Vorspul-Schrittweite</string>
@@ -221,6 +228,7 @@
     <string name="route_settings_privacy_disable_apple_podcasts_api_description">podium wird die Apple-Podcasts-API nicht mehr nutzen</string>
     <string name="route_settings_roaming_warning_description">Das Verbrauchen von Datenvolumen in fremden Netzen kann mit hohen Kosten verbunden sein. Möchtest du trotzdem fortfahren?</string>
     <string name="route_settings_roaming_warning_title">Achtung</string>
+    <string name="route_settings_synchronization_synchronize_now">Jetzt synchronisieren</string>
     <string name="route_subscriptions">Abonnements</string>
 
     <string name="snackbar_added_to_hear_later">zu » Später anhören « hinzugefügt</string>
@@ -273,4 +281,10 @@
     <string name="view_podcast_settings_subscription_enable_automatic_downloads_description">Neue Episoden automatisch herunterladen</string>
     <string name="view_podcast_settings_subscription_enable_notifications">Benachrichtigungen aktivieren</string>
     <string name="view_podcast_settings_subscription_enable_notifications_description">Erhalte Benachrichtigungen, wenn neue Episoden veröffentlicht werden</string>
+    <string name="common_action_login">Einloggen</string>
+    <string name="route_settings_synchronization">Synchronisation</string>
+    <string name="route_settings_synchronization_base_url">Basis-Url</string>
+    <string name="route_settings_synchronization_enable">Aktivieren</string>
+    <string name="route_settings_synchronization_full_synchronize">Vollständige Synchronisation starten</string>
+    <string name="route_settings_synchronization_last_synced">Letzter Sync: %1$s</string>
 </resources>
