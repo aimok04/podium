@@ -1,11 +1,13 @@
-package app.podiumpodcasts.podium.api.gpodder
+package app.podiumpodcasts.podium.api.sync.gpodder
 
+import android.os.Build
 import app.podiumpodcasts.podium.BuildConfig
-import app.podiumpodcasts.podium.api.gpodder.model.result.GpodderResult
-import app.podiumpodcasts.podium.api.gpodder.route.Auth
-import app.podiumpodcasts.podium.api.gpodder.route.Device
-import app.podiumpodcasts.podium.api.gpodder.route.EpisodeActions
-import app.podiumpodcasts.podium.api.gpodder.route.Subscriptions
+import app.podiumpodcasts.podium.api.sync.SyncClient
+import app.podiumpodcasts.podium.api.sync.gpodder.route.Auth
+import app.podiumpodcasts.podium.api.sync.gpodder.route.Device
+import app.podiumpodcasts.podium.api.sync.gpodder.route.EpisodeActions
+import app.podiumpodcasts.podium.api.sync.gpodder.route.Subscriptions
+import app.podiumpodcasts.podium.api.sync.model.result.SyncResult
 import app.podiumpodcasts.podium.utils.json
 import com.google.common.net.HttpHeaders
 import io.ktor.client.HttpClient
@@ -26,7 +28,7 @@ class GpodderClient(
     val username: String,
     val password: String,
     val cookie: String
-) {
+) : SyncClient {
 
     val httpClient = HttpClient {
         followRedirects = true
@@ -34,8 +36,8 @@ class GpodderClient(
         install(DefaultRequest) {
             val appVersion = BuildConfig.VERSION_CODE
 
-            val os = "Android ${android.os.Build.VERSION.RELEASE}"
-            val model = android.os.Build.MODEL
+            val os = "Android ${Build.VERSION.RELEASE}"
+            val model = Build.MODEL
 
             val github = "https://github.com/aimok04/podium"
 
@@ -60,14 +62,14 @@ class GpodderClient(
     suspend fun <T> parseResponse(
         response: HttpResponse,
         parseResult: suspend () -> T = { Unit as T }
-    ): GpodderResult.Success<T> {
+    ): SyncResult.Success<T> {
         if(response.status == HttpStatusCode.Unauthorized || response.status == HttpStatusCode.Forbidden)
-            throw GpodderResult.Unauthenticated(response)
+            throw SyncResult.Unauthenticated(response)
 
         if(response.status != HttpStatusCode.OK)
-            throw GpodderResult.Failure(response)
+            throw SyncResult.Failure(response)
 
-        return GpodderResult.Success(
+        return SyncResult.Success(
             result = parseResult()
         )
     }

@@ -1,6 +1,7 @@
 [versions]
 aboutLibraries = "14.0.0-b02" # Use the latest version
 agp = "8.13.2"
+browser = "1.10.0"
 coilCompose = "3.3.0"
 coilNetworkKtor3 = "3.3.0"
 composeShimmer = "1.3.3"
@@ -41,6 +42,7 @@ workRuntimeKtx = "2.11.1"
 [libraries]
 aboutlibraries-core = { group = "com.mikepenz", name = "aboutlibraries-core", version.ref = "aboutLibraries" }
 aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutLibraries" }
+androidx-browser = { module = "androidx.browser:browser", version.ref = "browser" }
 androidx-compose-adaptive = { module = "androidx.compose.material3.adaptive:adaptive" }
 androidx-compose-adaptive-navigation = { module = "androidx.compose.material3.adaptive:adaptive-navigation" }
 androidx-compose-adaptive-layout = { module = "androidx.compose.material3.adaptive:adaptive-layout" }

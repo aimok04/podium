@@ -1,8 +1,8 @@
-package app.podiumpodcasts.podium.api.gpodder.route
+package app.podiumpodcasts.podium.api.sync.gpodder.route
 
-import app.podiumpodcasts.podium.api.gpodder.GpodderClient
-import app.podiumpodcasts.podium.api.gpodder.model.result.AuthResult
-import app.podiumpodcasts.podium.api.gpodder.model.result.GpodderResult
+import app.podiumpodcasts.podium.api.sync.gpodder.GpodderClient
+import app.podiumpodcasts.podium.api.sync.model.result.AuthResult
+import app.podiumpodcasts.podium.api.sync.model.result.SyncResult
 import io.ktor.client.request.basicAuth
 import io.ktor.client.request.post
 import io.ktor.http.HttpHeaders
@@ -18,7 +18,7 @@ class Auth(
      *
      * @return whether login was successful
      */
-    suspend fun login(): GpodderResult.Success<AuthResult> {
+    suspend fun login(): SyncResult.Success<AuthResult> {
         val response = client.httpClient.post {
             url {
                 takeFrom(client.baseUrl)

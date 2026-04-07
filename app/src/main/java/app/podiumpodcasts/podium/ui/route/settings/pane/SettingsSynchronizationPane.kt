@@ -23,7 +23,6 @@ import androidx.compose.material.icons.automirrored.rounded.Logout
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.Password
-import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -60,14 +59,13 @@ import app.podiumpodcasts.podium.background.worker.sync.FullSynchronizationWorke
 import app.podiumpodcasts.podium.background.worker.sync.PartialSynchronizationWorker
 import app.podiumpodcasts.podium.manager.SyncManager
 import app.podiumpodcasts.podium.ui.component.common.ExperimentalBadge
-import app.podiumpodcasts.podium.ui.component.layout.InfoLayout
 import app.podiumpodcasts.podium.ui.component.settings.SettingsListItem
 import app.podiumpodcasts.podium.ui.component.settings.SettingsSwitchListItem
 import app.podiumpodcasts.podium.ui.formatPubDate
 import app.podiumpodcasts.podium.ui.helper.LocalDatabase
 import app.podiumpodcasts.podium.ui.helper.LocalSettingsRepository
 import app.podiumpodcasts.podium.ui.route.settings.SettingsPaneKey
-import app.podiumpodcasts.podium.ui.vm.GpodderLoginState
+import app.podiumpodcasts.podium.ui.vm.LoginState
 import app.podiumpodcasts.podium.ui.vm.SettingsSynchronizationViewModel
 import app.podiumpodcasts.podium.ui.vm.SettingsViewModel
 import kotlinx.coroutines.launch
@@ -96,6 +94,9 @@ fun SettingsSynchronizationPane(
 
     val enable = vm.repository.sync.enable.collectAsState(false)
     val type = vm.repository.sync.type.collectAsState("gpodder")
+
+    val displayType = remember { mutableStateOf("gpodder") }
+    LaunchedEffect(type.value) { displayType.value = type.value }
 
     val deviceId = vm.repository.sync.deviceId.collectAsState("-")
 
@@ -229,64 +230,18 @@ fun SettingsSynchronizationPane(
                     }
 
                     item {
-                        OutlinedTextField(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .animateItem(),
-
-                            leadingIcon = {
-                                Icon(
-                                    Icons.Rounded.Language,
-                                    stringResource(R.string.route_settings_synchronization_base_url)
-                                )
-                            },
-                            label = {
-                                Text(stringResource(R.string.route_settings_synchronization_base_url))
-                            },
-
-                            value = baseUrl.value,
-                            onValueChange = { value ->
-                                baseUrl.value = value
-                            },
-
-                            singleLine = true,
-
-                            keyboardOptions = KeyboardOptions(
-                                imeAction = ImeAction.Done,
-                                keyboardType = KeyboardType.Uri
-                            ),
-                            keyboardActions = KeyboardActions(
-                                onDone = {
-                                    scope.launch {
-                                        vm.repository.sync.setBaseUrl(baseUrl.value)
-                                        syncVm.resetAuth()
-                                    }
-                                }
-                            )
-                        )
-                    }
-
-                    item {
-                        Spacer(
-                            Modifier
-                                .height(32.dp)
-                                .animateItem()
-                        )
-                    }
-
-                    item {
                         PrimaryTabRow(
                             modifier = Modifier.animateItem(),
-                            selectedTabIndex = when(type.value) {
+                            selectedTabIndex = when(displayType.value) {
                                 "gpodder" -> 0
                                 "nextcloud" -> 1
                                 else -> 0
                             }
                         ) {
                             Tab(
-                                selected = type.value == "gpodder",
+                                selected = displayType.value == "gpodder",
                                 onClick = {
-                                    syncVm.setType("gpodder")
+                                    displayType.value = "gpodder"
                                 },
                                 text = {
                                     Text(
@@ -298,9 +253,9 @@ fun SettingsSynchronizationPane(
                             )
 
                             Tab(
-                                selected = type.value == "nextcloud",
+                                selected = displayType.value == "nextcloud",
                                 onClick = {
-                                    syncVm.setType("nextcloud")
+                                    displayType.value = "nextcloud"
                                 },
                                 text = {
                                     Text(
@@ -321,38 +276,86 @@ fun SettingsSynchronizationPane(
                         )
                     }
 
-                    if(type.value == "gpodder") {
-                        if(auth.value.isNotEmpty()) {
-                            item {
-                                Button(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    shapes = ButtonDefaults.shapes(),
-                                    onClick = {
-
+                    if(auth.value.isNotEmpty()) {
+                        item {
+                            Button(
+                                modifier = Modifier.fillMaxWidth(),
+                                shapes = ButtonDefaults.shapes(),
+                                onClick = {
+                                    scope.launch {
+                                        syncVm.resetAuth()
                                     }
-                                ) {
-                                    Icon(
-                                        Icons.AutoMirrored.Rounded.Logout,
-                                        contentDescription = stringResource(R.string.common_action_logout),
-                                        modifier = Modifier.size(
-                                            ButtonDefaults.iconSizeFor(
-                                                ButtonDefaults.MinHeight
-                                            )
-                                        ),
-                                    )
+                                }
+                            ) {
+                                Icon(
+                                    Icons.AutoMirrored.Rounded.Logout,
+                                    contentDescription = stringResource(R.string.common_action_logout),
+                                    modifier = Modifier.size(
+                                        ButtonDefaults.iconSizeFor(
+                                            ButtonDefaults.MinHeight
+                                        )
+                                    ),
+                                )
 
-                                    Spacer(
-                                        Modifier.size(
-                                            ButtonDefaults.iconSpacingFor(
-                                                ButtonDefaults.MinHeight
-                                            )
+                                Spacer(
+                                    Modifier.size(
+                                        ButtonDefaults.iconSpacingFor(
+                                            ButtonDefaults.MinHeight
                                         )
                                     )
+                                )
 
-                                    Text(stringResource(R.string.common_action_logout))
-                                }
+                                Text(stringResource(R.string.common_action_logout))
                             }
-                        } else {
+                        }
+                    } else {
+                        item {
+                            OutlinedTextField(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .animateItem(),
+
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Rounded.Language,
+                                        stringResource(R.string.route_settings_synchronization_base_url)
+                                    )
+                                },
+                                label = {
+                                    Text(stringResource(R.string.route_settings_synchronization_base_url))
+                                },
+
+                                value = baseUrl.value,
+                                onValueChange = { value ->
+                                    baseUrl.value = value
+                                },
+
+                                singleLine = true,
+
+                                keyboardOptions = KeyboardOptions(
+                                    imeAction = ImeAction.Done,
+                                    keyboardType = KeyboardType.Uri
+                                ),
+                                keyboardActions = KeyboardActions(
+                                    onDone = {
+                                        scope.launch {
+                                            vm.repository.sync.setBaseUrl(baseUrl.value)
+                                            syncVm.resetAuth()
+                                        }
+                                    }
+                                )
+                            )
+                        }
+
+                        item {
+                            Spacer(
+                                Modifier
+                                    .height(16.dp)
+                                    .animateItem()
+                            )
+                        }
+
+                        if(displayType.value == "gpodder") {
                             item {
                                 OutlinedTextField(
                                     modifier = Modifier
@@ -415,76 +418,71 @@ fun SettingsSynchronizationPane(
                             item {
                                 Spacer(Modifier.height(16.dp))
                             }
+                        }
 
-                            item {
-                                Button(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    shapes = ButtonDefaults.shapes(),
-                                    onClick = {
+                        item {
+                            Button(
+                                modifier = Modifier.fillMaxWidth(),
+                                shapes = ButtonDefaults.shapes(),
+                                onClick = {
+                                    if(displayType.value == "gpodder") {
                                         syncVm.gpodderLogin(context, username.value, password.value)
+                                    } else if(displayType.value == "nextcloud") {
+                                        syncVm.nextcloudLogin(context)
                                     }
-                                ) {
-                                    AnimatedContent(
-                                        targetState = syncVm.gpodderLoginState.value
-                                    ) { state ->
-                                        when(state) {
-                                            GpodderLoginState.Loading -> {
-                                                ContainedLoadingIndicator()
-                                            }
+                                }
+                            ) {
+                                AnimatedContent(
+                                    targetState = syncVm.loginState.value
+                                ) { state ->
+                                    when(state) {
+                                        LoginState.Loading -> {
+                                            ContainedLoadingIndicator()
+                                        }
 
-                                            else -> {
-                                                Row {
-                                                    Icon(
-                                                        Icons.AutoMirrored.Rounded.Login,
-                                                        contentDescription = stringResource(R.string.common_action_login),
-                                                        modifier = Modifier.size(
-                                                            ButtonDefaults.iconSizeFor(
-                                                                ButtonDefaults.MinHeight
-                                                            )
-                                                        ),
-                                                    )
+                                        else -> {
+                                            Row {
+                                                Icon(
+                                                    Icons.AutoMirrored.Rounded.Login,
+                                                    contentDescription = stringResource(R.string.common_action_login),
+                                                    modifier = Modifier.size(
+                                                        ButtonDefaults.iconSizeFor(
+                                                            ButtonDefaults.MinHeight
+                                                        )
+                                                    ),
+                                                )
 
-                                                    Spacer(
-                                                        Modifier.size(
-                                                            ButtonDefaults.iconSpacingFor(
-                                                                ButtonDefaults.MinHeight
-                                                            )
+                                                Spacer(
+                                                    Modifier.size(
+                                                        ButtonDefaults.iconSpacingFor(
+                                                            ButtonDefaults.MinHeight
                                                         )
                                                     )
+                                                )
 
-                                                    Text(stringResource(R.string.common_action_login))
-                                                }
+                                                Text(stringResource(R.string.common_action_login))
                                             }
                                         }
                                     }
                                 }
                             }
-
-                            if(syncVm.gpodderLoginState.value is GpodderLoginState.Failure) {
-                                item {
-                                    Spacer(Modifier.height(8.dp))
-                                }
-
-                                item {
-                                    val message =
-                                        (syncVm.gpodderLoginState.value as? GpodderLoginState.Failure)?.message
-                                            ?: stringResource(R.string.common_invalid_credentials)
-
-                                    Text(
-                                        text = message,
-                                        color = MaterialTheme.colorScheme.error
-                                    )
-                                }
-                            }
                         }
-                    } else if(type.value == "nextcloud") {
-                        item {
-                            InfoLayout(
-                                modifier = Modifier.animateItem(),
-                                icon = Icons.Rounded.Warning,
-                                title = { "Not supported yet" },
-                                content = { Text("Support for nextcloud-gpodder will be added in a future version.") }
-                            )
+
+                        if(syncVm.loginState.value is LoginState.Failure) {
+                            item {
+                                Spacer(Modifier.height(8.dp))
+                            }
+
+                            item {
+                                val message =
+                                    (syncVm.loginState.value as? LoginState.Failure)?.message
+                                        ?: stringResource(R.string.common_invalid_credentials)
+
+                                Text(
+                                    text = message,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
                         }
                     }
                 }

@@ -1,10 +1,10 @@
-package app.podiumpodcasts.podium.api.gpodder.model.result
+package app.podiumpodcasts.podium.api.sync.model.result
 
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.request
 
-interface GpodderResult<T> {
-    data class Success<T>(val result: T) : GpodderResult<T>
+interface SyncResult<T> {
+    data class Success<T>(val result: T) : SyncResult<T>
 
     open class Failure(val response: HttpResponse) : Exception() {
 
@@ -14,4 +14,6 @@ interface GpodderResult<T> {
     }
 
     class Unauthenticated(response: HttpResponse) : Failure(response)
+
+    class NotSupported<T> : SyncResult<T>
 }

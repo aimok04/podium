@@ -13,8 +13,8 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import app.podiumpodcasts.podium.SettingsRepository
 import app.podiumpodcasts.podium.api.db.model.SyncActionType
-import app.podiumpodcasts.podium.api.gpodder.model.episodeactions.EpisodeAction
-import app.podiumpodcasts.podium.api.gpodder.model.result.GpodderResult
+import app.podiumpodcasts.podium.api.sync.model.episodeactions.EpisodeAction
+import app.podiumpodcasts.podium.api.sync.model.result.SyncResult
 import app.podiumpodcasts.podium.manager.DatabaseManager
 import app.podiumpodcasts.podium.manager.PodcastManager
 import app.podiumpodcasts.podium.manager.SyncManager
@@ -41,7 +41,7 @@ class PartialSynchronizationWorker(
 
         Log.d("PartialSynchronizationWorker", "Running partial sync ...")
 
-        val client = SyncManager.createGpodderClient(settingsRepository)
+        val client = SyncManager.createClient(settingsRepository)
 
         return try {
             val deviceId = settingsRepository.sync.deviceId.first()
@@ -177,14 +177,17 @@ class PartialSynchronizationWorker(
 
             Log.d("PartialSynchronizationWorker", "Finished partial sync.")
             Result.success()
-        } catch(e: GpodderResult.Unauthenticated) {
+        } catch(e: SyncResult.Unauthenticated) {
             e.printStackTrace()
 
             try {
-                val response = client.auth.login()
-                settingsRepository.sync.setAuth(response.result.cookie)
-
-                Result.retry()
+                val response = client.auth.relogin()
+                if(response is SyncResult.Success) {
+                    settingsRepository.sync.setAuth(response.result.cookie)
+                    Result.retry()
+                } else {
+                    Result.failure()
+                }
             } catch(e: Exception) {
                 Log.e("PartialSynchronizationWorker", "Error while trying to reauthenticate:")
 

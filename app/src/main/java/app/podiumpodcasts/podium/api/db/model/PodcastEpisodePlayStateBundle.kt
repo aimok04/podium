@@ -2,7 +2,7 @@ package app.podiumpodcasts.podium.api.db.model
 
 import androidx.room.Embedded
 import androidx.room.Relation
-import app.podiumpodcasts.podium.api.gpodder.model.episodeactions.EpisodeAction
+import app.podiumpodcasts.podium.api.sync.model.episodeactions.EpisodeAction
 import app.podiumpodcasts.podium.utils.unixSecondsToIso8601
 import kotlin.time.ExperimentalTime
 
@@ -19,7 +19,7 @@ data class PodcastEpisodePlayStateBundle(
         deviceId: String
     ): EpisodeAction {
         return EpisodeAction(
-            type = "play",
+            _type = "play",
             podcastOrigin = episode.origin,
             episodeAudioUrl = episode.audioUrl,
             deviceId = deviceId,

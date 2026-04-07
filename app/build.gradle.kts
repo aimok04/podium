@@ -138,6 +138,9 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.network.ktor3)
 
+    // Chrome Custom Tabs for Nextcloud login flow
+    implementation(libs.androidx.browser)
+
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)
     implementation(libs.androidx.media3.common)

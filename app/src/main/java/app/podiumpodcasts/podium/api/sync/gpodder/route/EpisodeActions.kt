@@ -1,10 +1,10 @@
-package app.podiumpodcasts.podium.api.gpodder.route
+package app.podiumpodcasts.podium.api.sync.gpodder.route
 
-import app.podiumpodcasts.podium.api.gpodder.GpodderClient
-import app.podiumpodcasts.podium.api.gpodder.model.episodeactions.EpisodeAction
-import app.podiumpodcasts.podium.api.gpodder.model.result.EpisodeActionsGetResult
-import app.podiumpodcasts.podium.api.gpodder.model.result.GpodderResult
-import app.podiumpodcasts.podium.api.gpodder.model.result.UploadChangesResult
+import app.podiumpodcasts.podium.api.sync.gpodder.GpodderClient
+import app.podiumpodcasts.podium.api.sync.model.episodeactions.EpisodeAction
+import app.podiumpodcasts.podium.api.sync.model.result.EpisodeActionsGetResult
+import app.podiumpodcasts.podium.api.sync.model.result.SyncResult
+import app.podiumpodcasts.podium.api.sync.model.result.UploadChangesResult
 import app.podiumpodcasts.podium.utils.json
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -29,7 +29,7 @@ class EpisodeActions(
      */
     suspend fun upload(
         actions: List<EpisodeAction>
-    ): GpodderResult.Success<UploadChangesResult> {
+    ): SyncResult.Success<UploadChangesResult> {
         val response = client.httpClient.post {
             url {
                 takeFrom(client.baseUrl)
@@ -59,7 +59,7 @@ class EpisodeActions(
     suspend fun get(
         since: Long,
         aggregated: Boolean = true
-    ): GpodderResult.Success<EpisodeActionsGetResult> {
+    ): SyncResult.Success<EpisodeActionsGetResult> {
         val response = client.httpClient.get {
             url {
                 takeFrom(client.baseUrl)

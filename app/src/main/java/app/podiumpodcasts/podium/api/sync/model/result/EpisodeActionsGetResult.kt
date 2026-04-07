@@ -1,6 +1,6 @@
-package app.podiumpodcasts.podium.api.gpodder.model.result
+package app.podiumpodcasts.podium.api.sync.model.result
 
-import app.podiumpodcasts.podium.api.gpodder.model.episodeactions.EpisodeAction
+import app.podiumpodcasts.podium.api.sync.model.episodeactions.EpisodeAction
 import kotlinx.serialization.Serializable
 
 @Serializable

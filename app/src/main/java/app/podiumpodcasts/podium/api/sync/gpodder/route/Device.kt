@@ -1,7 +1,7 @@
-package app.podiumpodcasts.podium.api.gpodder.route
+package app.podiumpodcasts.podium.api.sync.gpodder.route
 
-import app.podiumpodcasts.podium.api.gpodder.GpodderClient
-import app.podiumpodcasts.podium.api.gpodder.model.result.GpodderResult
+import app.podiumpodcasts.podium.api.sync.gpodder.GpodderClient
+import app.podiumpodcasts.podium.api.sync.model.result.SyncResult
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -21,7 +21,7 @@ class Device(
      */
     suspend fun update(
         deviceType: String = "mobile"
-    ): GpodderResult.Success<Any> {
+    ): SyncResult.Success<Any> {
         val response = client.httpClient.post {
             url {
                 takeFrom(client.baseUrl)

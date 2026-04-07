@@ -3,7 +3,7 @@ package app.podiumpodcasts.podium.api.db.model
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import app.podiumpodcasts.podium.api.gpodder.model.episodeactions.EpisodeAction
+import app.podiumpodcasts.podium.api.sync.model.episodeactions.EpisodeAction
 import app.podiumpodcasts.podium.utils.unixSecondsToIso8601
 
 enum class SyncActionType {
@@ -39,7 +39,7 @@ data class SyncActionModel(
             throw Exception("actionType must be PLAY")
 
         return EpisodeAction(
-            type = "play",
+            _type = "play",
             podcastOrigin = origin,
             episodeAudioUrl = audioUrl!!,
             deviceId = deviceId,

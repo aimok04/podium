@@ -2,7 +2,8 @@ package app.podiumpodcasts.podium.manager
 
 import android.content.Context
 import app.podiumpodcasts.podium.SettingsRepository
-import app.podiumpodcasts.podium.api.gpodder.GpodderClient
+import app.podiumpodcasts.podium.api.sync.UnifiedSyncClient
+import app.podiumpodcasts.podium.api.sync.UnifiedSyncClientType
 import app.podiumpodcasts.podium.utils.getFriendlyDeviceName
 import kotlinx.coroutines.flow.first
 import java.util.UUID
@@ -10,17 +11,24 @@ import java.util.UUID
 class SyncManager {
 
     companion object {
-        suspend fun createGpodderClient(
-            settingsRepository: SettingsRepository,
-            username: String? = null,
-            password: String? = null
-        ): GpodderClient {
-            return GpodderClient(
+        suspend fun createClient(
+            settingsRepository: SettingsRepository
+        ): UnifiedSyncClient {
+            val type = settingsRepository.sync.type.first()
+
+            return UnifiedSyncClient(
+                type = when(type) {
+                    "gpodder" -> UnifiedSyncClientType.GPODDER
+                    "nextcloud" -> UnifiedSyncClientType.NEXTCLOUD_GPODDER
+                    else -> throw Exception("invalid sync type")
+                },
+
                 deviceCaption = settingsRepository.sync.deviceCaption.first(),
                 deviceId = settingsRepository.sync.deviceId.first(),
+
                 baseUrl = settingsRepository.sync.baseUrl.first(),
-                username = username ?: settingsRepository.sync.username.first(),
-                password = password ?: settingsRepository.sync.password.first(),
+                username = settingsRepository.sync.username.first(),
+                password = settingsRepository.sync.password.first(),
                 cookie = settingsRepository.sync.auth.first()
             )
         }

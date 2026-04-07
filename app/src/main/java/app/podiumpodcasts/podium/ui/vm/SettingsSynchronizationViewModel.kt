@@ -1,21 +1,26 @@
 package app.podiumpodcasts.podium.ui.vm
 
 import android.content.Context
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.podiumpodcasts.podium.SettingsRepository
 import app.podiumpodcasts.podium.api.db.AppDatabase
-import app.podiumpodcasts.podium.api.gpodder.GpodderClient
+import app.podiumpodcasts.podium.api.sync.gpodder.GpodderClient
+import app.podiumpodcasts.podium.api.sync.nextcloud_gpodder.NextcloudGpodderClient
+import app.podiumpodcasts.podium.api.sync.nextcloud_gpodder.model.PollResult
 import app.podiumpodcasts.podium.background.worker.sync.FullSynchronizationWorker
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-interface GpodderLoginState {
-    object Idle : GpodderLoginState
-    object Loading : GpodderLoginState
-    object Done : GpodderLoginState
-    data class Failure(val message: String?) : GpodderLoginState
+interface LoginState {
+    object Idle : LoginState
+    object Loading : LoginState
+    object Done : LoginState
+    data class Failure(val message: String?) : LoginState
 }
 
 class SettingsSynchronizationViewModel(
@@ -23,7 +28,7 @@ class SettingsSynchronizationViewModel(
     val repository: SettingsRepository
 ) : ViewModel() {
 
-    val gpodderLoginState = mutableStateOf<GpodderLoginState>(GpodderLoginState.Idle)
+    val loginState = mutableStateOf<LoginState>(LoginState.Idle)
 
     fun gpodderLogin(
         context: Context,
@@ -31,7 +36,7 @@ class SettingsSynchronizationViewModel(
         password: String
     ) {
         viewModelScope.launch {
-            gpodderLoginState.value = GpodderLoginState.Loading
+            loginState.value = LoginState.Loading
 
             try {
                 val client = GpodderClient(
@@ -48,6 +53,8 @@ class SettingsSynchronizationViewModel(
 
                 client.device.update()
 
+                repository.sync.setType("gpodder")
+
                 repository.sync.setUsername(username)
                 repository.sync.setPassword(password)
                 repository.sync.setAuth(result.result.cookie)
@@ -55,11 +62,64 @@ class SettingsSynchronizationViewModel(
                 repository.sync.setTimestampSubscriptions(0L)
                 repository.sync.setTimestampEpisodeActions(0L)
 
-                gpodderLoginState.value = GpodderLoginState.Done
+                loginState.value = LoginState.Done
 
                 FullSynchronizationWorker.enqueue(context)
             } catch(e: Exception) {
-                gpodderLoginState.value = GpodderLoginState.Failure(e.toString())
+                loginState.value = LoginState.Failure(e.toString())
+            }
+        }
+    }
+
+    fun nextcloudLogin(
+        context: Context
+    ) {
+        viewModelScope.launch {
+            loginState.value = LoginState.Loading
+
+            try {
+                val client = NextcloudGpodderClient(
+                    baseUrl = repository.sync.baseUrl.first()
+                )
+
+                val result = client.auth.startLogin()
+
+                val intent = CustomTabsIntent.Builder()
+                    .setShowTitle(true)
+                    .build()
+
+                intent.launchUrl(context, result.result.login.toUri())
+
+                var attempts = 0
+                while(attempts < 100) {
+                    attempts++
+
+                    try {
+                        delay(1500)
+
+                        val pollResult = client.auth.poll(result.result.poll)
+                        if(pollResult.result is PollResult.Successful) {
+                            repository.sync.setType("nextcloud")
+
+                            repository.sync.setUsername(pollResult.result.loginName)
+                            repository.sync.setPassword(pollResult.result.appPassword)
+                            repository.sync.setAuth("logged in")
+
+                            repository.sync.setTimestampSubscriptions(0L)
+                            repository.sync.setTimestampEpisodeActions(0L)
+
+                            loginState.value = LoginState.Done
+
+                            FullSynchronizationWorker.enqueue(context)
+                            break
+                        }
+                    } catch(e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            } catch(e: Exception) {
+                e.printStackTrace()
+                loginState.value = LoginState.Failure(e.toString())
             }
         }
     }
@@ -68,21 +128,6 @@ class SettingsSynchronizationViewModel(
         repository.sync.setUsername("")
         repository.sync.setPassword("")
         repository.sync.setAuth("")
-    }
-
-    fun setType(type: String) {
-        viewModelScope.launch {
-            repository.sync.setBaseUrl(
-                when(type) {
-                    "gpodder" -> "https://gpodder.net"
-                    else -> ""
-                }
-            )
-
-            resetAuth()
-
-            repository.sync.setType(type)
-        }
     }
 
 }
