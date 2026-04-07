@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import app.podiumpodcasts.podium.api.db.model.PodcastModel
 import kotlinx.coroutines.flow.Flow
@@ -54,8 +55,17 @@ interface PodcastDao {
     @Insert
     suspend fun insertAll(vararg podcasts: PodcastModel)
 
+    @Transaction
+    suspend fun updateImageSeedColor(origin: String, imageSeedColor: Int) {
+        _updateImageSeedColor(origin, imageSeedColor)
+        _updateImageSeedColorForEpisodes(origin, imageSeedColor)
+    }
+
     @Query("UPDATE podcast SET imageSeedColor=:imageSeedColor WHERE origin=:origin")
-    suspend fun updateImageSeedColor(origin: String, imageSeedColor: Int)
+    suspend fun _updateImageSeedColor(origin: String, imageSeedColor: Int)
+
+    @Query("UPDATE podcastEpisode SET imageSeedColor=:imageSeedColor WHERE origin=:origin")
+    suspend fun _updateImageSeedColorForEpisodes(origin: String, imageSeedColor: Int)
 
     @Update
     suspend fun update(podcast: PodcastModel)
