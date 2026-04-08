@@ -173,8 +173,8 @@
     <string name="route_discover_search_text">Entrez une recherche et appuyez sur \"Entrée\" pour commencer votre voyage.</string>
     <string name="route_discover_search_title">Prêt à explorer ?</string>
     <string name="route_downloads">Téléchargements</string>
-    <string name="route_downloads_empty_text">C\'est assez ouvert ici ! Téléchargez un épisode pour le prendre avec vous ou activez les téléchargements automatiques pour ne jamais manquer une note.</string>
-    <string name="route_downloads_empty_title">Rien si ce n\'est le ciel bleu</string>
+    <string name="route_downloads_empty_text">C\'est plutôt vide ici ! Téléchargez un épisode pour le prendre avec vous ou activez les téléchargements automatiques pour ne jamais manquer une note.</string>
+    <string name="route_downloads_empty_title">Rien, juste le ciel bleu</string>
     <string name="route_history">Historique</string>
     <string name="route_history_empty_text">Vous n\'avez encore rien écouté pour l\'instant. Commencez votre voyage en choisissant un podcast — votre historique apparaitra ici au fur et à mesure.</string>
     <string name="route_history_empty_title">Une page blanche</string>
