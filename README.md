@@ -21,6 +21,7 @@ The app uses **Material 3 Expressive** design to fit right in with modern Androi
 - Create **📂 lists** of podcasts or episodes to keep your library organized.
 - **🔍 Discover** new podcasts on the *» Discover «* tab *(powered by Apple Podcasts)*.
 - Listen to your favorite podcasts on the go with **🚘 Android Auto**.
+- **☁️ Sync** your subscriptions and play states with [**gpodder.net**](https://gpodder.net) or [**nextcloud-gpodder**](https://github.com/thrillfall/nextcloud-gpodder).
 
 ## 📦 Installation
 
