@@ -1,10 +1,5 @@
 Hey 👋
 
-This release contains some new features and a new language:
-
-- Added **syncing** support *(only gpodder, nextcloud-gpodder will be added later)* (#1).
-- Added Italian 🇮🇹 translation (by @aldomelpignano) (#28).
-- Improved settings with separated category screens.
-- Fixed a bug where the episode's image seed color didn't update with the podcast's color.
-- Fixed podcast adding issues (#27).
-- Fixed `opml` compatibility issues (#32).
+- Added **syncing** support *now also with nextcloud-gpodder* (#1).
+- Added French 🇫🇷 translation (by @Semprista) (#36).
+- Fixed **crash** after finishing episode.
