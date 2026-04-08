@@ -47,7 +47,7 @@
     <string name="common_done">Terminé</string>
     <string name="common_downloaded">Téléchargé</string>
     <string name="common_downloaded_at">Téléchargé</string>
-    <string name="common_downloading">Téléchargement en cours...</string>
+    <string name="common_downloading">Téléchargement en cours…</string>
     <string name="common_duration">Durée</string>
     <string name="common_episodes">Épisodes</string>
     <string name="common_experimental">Expérimental</string>
@@ -192,7 +192,7 @@
     <string name="route_import_podcast_already_imported">Déjà importé</string>
     <string name="route_import_select_backup_file">Sélectionnez un fichier pour l\'importer</string>
     <string name="route_import_select_backup_file_text_opml">Veuillez sélectionner un fichier .opml</string>
-    <string name="route_import_unpacking">Décompression...</string>
+    <string name="route_import_unpacking">Décompression…</string>
     <string name="route_library">Bibliothèque</string>
     <string name="route_library_search_empty_text">Rien ne correspond à ce nom dans votre bibliothèque. Essayez avec un terme plus large.</string>
     <string name="route_library_search_empty_title">Aucune correspondance dans votre bibliothèque</string>
@@ -219,7 +219,7 @@
     <string name="route_restore_restart_needed_text">Votre base de données a été importée avec succès. L\'app doit redémarrer pour charger vos données.</string>
     <string name="route_restore_select_backup_file">Sélectionner un fichier de sauvegarde</string>
     <string name="route_restore_select_backup_file_text">Veuillez sélectionner un fichier de sauvegarde %1$s.</string>
-    <string name="route_restore_unpacking">Décompression...</string>
+    <string name="route_restore_unpacking">Décompression…</string>
     <string name="route_settings">Paramètres</string>
     <string name="route_settings_about">À propos</string>
     <string name="route_settings_appearance">Apparence</string>
@@ -266,8 +266,8 @@
     <string name="route_settings_import_export_import_from_opml_description">Transférer vos podcasts depuis une autre app de podcasts</string>
     <string name="route_settings_playback">Lecture</string>
     <string name="route_settings_player">Lecteur</string>
-    <string name="route_settings_player_seek_back_increment">Reculer de...</string>
-    <string name="route_settings_player_seek_forward_increment">Avancer de...</string>
+    <string name="route_settings_player_seek_back_increment">Reculer de…</string>
+    <string name="route_settings_player_seek_forward_increment">Avancer de…</string>
     <string name="route_settings_privacy">Confidentialité</string>
     <string name="route_settings_privacy_disable_apple_podcasts_api">Désactiver l\'utilisation de l\'API d\'Apple Podcasts</string>
     <string name="route_settings_privacy_disable_apple_podcasts_api_description">Si cette option est activée, podium n\'utilisera plus l\'API d\'Apple Podcasts</string>
