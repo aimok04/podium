@@ -15,7 +15,6 @@
 local.properties
 .kotlin
 
-/fastlane/Appfile
 /fastlane/.env
 /fastlane/.env.default
 /fastlane/report.xml

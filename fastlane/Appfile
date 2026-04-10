@@ -1,0 +1,2 @@
+json_key_file("./service_account_key.json")
+package_name("app.podiumpodcasts.podium")
