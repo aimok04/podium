@@ -1,5 +1,3 @@
 Hey 👋
 
-- Added **syncing** support *now also with nextcloud-gpodder* (#1).
-- Added French 🇫🇷 translation (by @Semprista) (#36).
-- Fixed **crash** after finishing episode.
+- Fixed issue with non-standard `ìtunes:duration` values (#40).
