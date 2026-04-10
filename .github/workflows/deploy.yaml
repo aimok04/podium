@@ -30,7 +30,7 @@ jobs:
           bundler-cache: true
 
       - name: Decode Google Service Account Key
-        run: echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}' > fastlane/service_account_key.json
+        run: echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}' > service_account_key.json
 
       - name: Decode Keystore
         run: echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > app/keystore.jks
