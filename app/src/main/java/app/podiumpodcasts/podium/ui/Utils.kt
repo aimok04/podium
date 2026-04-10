@@ -52,15 +52,33 @@ fun parsePubDate(pubDate: String): Long {
  * Returns duration in seconds
  */
 fun parseItunesDuration(duration: String): Int {
-    if(duration.isEmpty())
-        return 0
+    try {
+        if(duration.isEmpty())
+            return 0
 
-    if(duration.isDigitsOnly())
-        return duration.toInt()
+        if(duration.isDigitsOnly())
+            return duration.toInt()
 
-    val parts = duration.split(":")
-    if(parts.size == 2) return parts[0].toInt() * 60 + parts[1].toInt()
-    return parts[0].toInt() * 3600 + parts[1].toInt() * 60 + parts[0].toInt()
+        if(duration.contains(":")) {
+            val parts = duration.split(":")
+            if(parts.size == 2) return parts[0].toInt() * 60 + parts[1].toInt()
+            return parts[0].toInt() * 3600 + parts[1].toInt() * 60 + parts[2].toInt()
+        } else {
+            val hourRegex = """(\d+)\s*H""".toRegex(RegexOption.IGNORE_CASE)
+            val minRegex = """(\d+)\s*M""".toRegex(RegexOption.IGNORE_CASE)
+            val secRegex = """(\d+)\s*S""".toRegex(RegexOption.IGNORE_CASE)
+
+            val hours = hourRegex.find(duration)?.groupValues?.get(1)?.toLong() ?: 0L
+            val minutes = minRegex.find(duration)?.groupValues?.get(1)?.toLong() ?: 0L
+            val seconds = secRegex.find(duration)?.groupValues?.get(1)?.toLong() ?: 0L
+
+            return ((hours * 3600) + (minutes * 60) + seconds).toInt()
+        }
+    } catch(e: Exception) {
+        // return one hour as fallback to enable import even when duration is malformatted
+        e.printStackTrace()
+        return 3600
+    }
 }
 
 /* Durations */
