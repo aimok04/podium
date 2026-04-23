@@ -179,6 +179,10 @@
     <string name="route_settings">Settings</string>
     <string name="route_settings_about">About</string>
     <string name="route_settings_appearance">Appearance</string>
+    <string name="route_settings_appearance_theme">Theme</string>
+    <string name="route_settings_appearance_theme_system">System</string>
+    <string name="route_settings_appearance_theme_light">Light</string>
+    <string name="route_settings_appearance_theme_dark">Dark</string>
     <string name="route_settings_appearance_enable_artwork_colors">Enable artwork colors</string>
     <string name="route_settings_appearance_enable_artwork_colors_description">Use dynamic theme based off artwork colors in media player and podcast detail pages</string>
     <string name="route_settings_appearance_use_alternative_branding">Use » Podcasts « branding</string>
