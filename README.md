@@ -48,4 +48,4 @@ If you still want to contribute a translation, feel free to open a *PR*! :)
 
 ## 📜 License
 
-[GNU General Public License v3.0](/LICENSE)
+[GNU General Public License v3.0 or later](/LICENSE)
