@@ -78,6 +78,12 @@ class MediaPlayerViewModel : ViewModel() {
     val queue = mutableStateListOf<String>()
     val queueIndex = mutableStateListOf<Int>()
 
+    val canResumeCurrentEpisode: Boolean
+        get() {
+            val mediaItem = mediaController?.currentMediaItem ?: return false
+            return mediaItem.localConfiguration?.uri != null
+        }
+
     fun play(
         context: Context,
         bundle: PodcastEpisodeBundle
