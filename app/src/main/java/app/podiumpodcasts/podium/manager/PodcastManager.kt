@@ -7,6 +7,7 @@ import app.podiumpodcasts.podium.api.db.model.PodcastEpisodeModel
 import app.podiumpodcasts.podium.api.db.model.PodcastModel
 import app.podiumpodcasts.podium.api.rss.FetchPodcastClient
 import app.podiumpodcasts.podium.api.rss.FetchPodcastClientResult
+import app.podiumpodcasts.podium.utils.normalizeOrigin
 import app.podiumpodcasts.podium.utils.rss.toPodcast
 import app.podiumpodcasts.podium.utils.rss.toPodcastEpisode
 
@@ -25,7 +26,7 @@ class PodcastManager(
         origin: String,
         seedColor: Color?
     ): AddPodcastResult {
-        db.podcasts().getSync(origin)?.let { duplicate ->
+        findExisting(origin)?.let { duplicate ->
             return AddPodcastResult.Duplicate(
                 duplicate = duplicate
             )
@@ -48,7 +49,7 @@ class PodcastManager(
         seedColor: Color?,
         duplicateCheck: Boolean = true
     ): AddPodcastResult {
-        if(duplicateCheck) db.podcasts().getSync(podcast.origin)?.let { duplicate ->
+        if(duplicateCheck) findExisting(podcast.origin)?.let { duplicate ->
             return AddPodcastResult.Duplicate(
                 duplicate = duplicate
             )
@@ -64,6 +65,25 @@ class PodcastManager(
         return AddPodcastResult.Created(
             podcast = podcast
         )
+    }
+
+    /**
+     * Looks up an existing podcast by origin, tolerating cosmetic URL
+     * rewrites a sync service may apply (gpodder.net lowercases scheme/host
+     * and turns an empty path into "/") in either direction - the stored
+     * origin or the given one may be the rewritten one.
+     */
+    private suspend fun findExisting(origin: String): PodcastModel? {
+        db.podcasts().getSync(origin)?.let { return it }
+
+        val normalized = origin.normalizeOrigin()
+        if(normalized != origin) db.podcasts().getSync(normalized)?.let { return it }
+        db.podcasts().getSync("$normalized/")?.let { return it }
+
+        // Case differences alone aren't caught above since the DAO does an
+        // exact match - fall back to a case-insensitive comparison.
+        db.podcasts().getSyncCaseInsensitive(normalized)?.let { return it }
+        return db.podcasts().getSyncCaseInsensitive("$normalized/")
     }
 
 }

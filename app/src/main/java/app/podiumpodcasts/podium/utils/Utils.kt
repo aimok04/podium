@@ -56,6 +56,32 @@ fun getCountryCode(
     }
 }
 
+/**
+ * Normalizes a podcast origin URL for comparison purposes.
+ *
+ * Sync services like gpodder.net can rewrite subscription URLs when uploaded:
+ * scheme and host are lowercased, and an entirely empty path becomes "/"
+ * (see gpodder.net's `normalize_feed_url`). The URL path itself stays
+ * untouched, since it can be legitimately case-sensitive.
+ */
+fun String.normalizeOrigin(): String {
+    val trimmed = trim()
+
+    val schemeSeparator = trimmed.indexOf("://")
+    if(schemeSeparator == -1) return trimmed.trimEnd('/')
+
+    val scheme = trimmed.substring(0, schemeSeparator).lowercase()
+    val rest = trimmed.substring(schemeSeparator + 3)
+
+    val authorityEnd = rest.indexOfFirst { it == '/' || it == '?' || it == '#' }
+        .let { if(it == -1) rest.length else it }
+
+    val authority = rest.substring(0, authorityEnd).lowercase()
+    val pathAndBeyond = rest.substring(authorityEnd)
+
+    return "$scheme://$authority$pathAndBeyond".trimEnd('/')
+}
+
 fun String.sha256(): String {
     val digest = MessageDigest.getInstance("SHA-256")
     val hashBytes = digest.digest(toByteArray(Charsets.UTF_8))

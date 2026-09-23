@@ -11,9 +11,11 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import app.podiumpodcasts.podium.SettingsRepository
 import app.podiumpodcasts.podium.api.sync.model.result.SyncResult
+import app.podiumpodcasts.podium.manager.AddPodcastResult
 import app.podiumpodcasts.podium.manager.DatabaseManager
 import app.podiumpodcasts.podium.manager.PodcastManager
 import app.podiumpodcasts.podium.manager.SyncManager
+import app.podiumpodcasts.podium.utils.normalizeOrigin
 import kotlinx.coroutines.flow.first
 
 class FullSynchronizationWorker(
@@ -42,14 +44,29 @@ class FullSynchronizationWorker(
             val subscriptionsResult = client.subscriptions.getChanges(0L)
 
             val remoteOrigins = subscriptionsResult.result.add
-            val localOrigins = db.podcastSubscriptions().allOrigins().toSet()
+            val localOrigins = db.podcastSubscriptions().allOrigins()
+                .map { it.normalizeOrigin() }
+                .toSet()
 
-            val newOrigins = remoteOrigins.filterNot { localOrigins.contains(it) }
+            val newOrigins = remoteOrigins.filterNot { it.normalizeOrigin() in localOrigins }
             newOrigins.forEach { origin ->
-                podcastManager.addPodcast(origin, null)
-                if(db.podcastSubscriptions().getSync(origin) == null) {
-                    db.podcastSubscriptions().subscribe(origin)
-                    Log.d("FullSynchronizationWorker", "Subscribed $origin due to remote change.")
+                // The podcast may already exist locally under a cosmetically
+                // different origin (e.g. gpodder appending a trailing slash) -
+                // always subscribe using the origin actually stored for it,
+                // never the raw remote string, to avoid orphaning the FK.
+                val result = podcastManager.addPodcast(origin, null)
+                val resolvedOrigin = when(result) {
+                    is AddPodcastResult.Created -> result.podcast.origin
+                    is AddPodcastResult.Duplicate -> result.duplicate.origin
+                    else -> origin
+                }
+
+                if(db.podcastSubscriptions().getSync(resolvedOrigin) == null) {
+                    db.podcastSubscriptions().subscribe(resolvedOrigin)
+                    Log.d(
+                        "FullSynchronizationWorker",
+                        "Subscribed $resolvedOrigin due to remote change."
+                    )
                 }
             }
 

@@ -30,6 +30,9 @@ interface PodcastDao {
     @Query("SELECT * FROM podcast WHERE origin=:origin")
     suspend fun getSync(origin: String): PodcastModel?
 
+    @Query("SELECT * FROM podcast WHERE origin = :origin COLLATE NOCASE LIMIT 1")
+    suspend fun getSyncCaseInsensitive(origin: String): PodcastModel?
+
     @Query(
         """
         SELECT * FROM podcast

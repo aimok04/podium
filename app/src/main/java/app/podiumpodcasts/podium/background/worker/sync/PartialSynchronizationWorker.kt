@@ -15,9 +15,11 @@ import app.podiumpodcasts.podium.SettingsRepository
 import app.podiumpodcasts.podium.api.db.model.SyncActionType
 import app.podiumpodcasts.podium.api.sync.model.episodeactions.EpisodeAction
 import app.podiumpodcasts.podium.api.sync.model.result.SyncResult
+import app.podiumpodcasts.podium.manager.AddPodcastResult
 import app.podiumpodcasts.podium.manager.DatabaseManager
 import app.podiumpodcasts.podium.manager.PodcastManager
 import app.podiumpodcasts.podium.manager.SyncManager
+import app.podiumpodcasts.podium.utils.normalizeOrigin
 import kotlinx.coroutines.flow.first
 import java.util.concurrent.TimeUnit
 
@@ -119,17 +121,33 @@ class PartialSynchronizationWorker(
                 "Received ${subscriptionsResult.result.add.size + subscriptionsResult.result.remove.size} subscription changes and ${episodeActionsResult.result.actions.size} episode action changes. Processing ..."
             )
 
-            subscriptionsResult.result.add.forEach { origin ->
-                podcastManager.addPodcast(origin, null)
-                if(db.podcastSubscriptions().getSync(origin) == null) {
-                    db.podcastSubscriptions().subscribe(origin)
+            val localSubscriptionOrigins = db.podcastSubscriptions().allOrigins()
+                .map { it.normalizeOrigin() }
+                .toSet()
 
-                    Log.d(
-                        "PartialSynchronizationWorker",
-                        "Subscribed $origin due to remote change."
-                    )
+            subscriptionsResult.result.add
+                .filterNot { it.normalizeOrigin() in localSubscriptionOrigins }
+                .forEach { origin ->
+                    // The podcast may already exist locally under a cosmetically
+                    // different origin (e.g. gpodder appending a trailing slash) -
+                    // always subscribe using the origin actually stored for it,
+                    // never the raw remote string, to avoid orphaning the FK.
+                    val result = podcastManager.addPodcast(origin, null)
+                    val resolvedOrigin = when(result) {
+                        is AddPodcastResult.Created -> result.podcast.origin
+                        is AddPodcastResult.Duplicate -> result.duplicate.origin
+                        else -> origin
+                    }
+
+                    if(db.podcastSubscriptions().getSync(resolvedOrigin) == null) {
+                        db.podcastSubscriptions().subscribe(resolvedOrigin)
+
+                        Log.d(
+                            "PartialSynchronizationWorker",
+                            "Subscribed $resolvedOrigin due to remote change."
+                        )
+                    }
                 }
-            }
 
             subscriptionsResult.result.remove.forEach { origin ->
                 db.podcastSubscriptions()
