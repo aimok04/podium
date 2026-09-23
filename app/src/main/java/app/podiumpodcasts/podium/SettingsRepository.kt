@@ -12,12 +12,14 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import app.podiumpodcasts.podium.ui.theme.ThemeMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 object SettingsKeys {
+    val APPEARANCE_THEME_MODE = stringPreferencesKey("appearance_theme_mode")
     val APPEARANCE_ENABLE_ARTWORK_COLORS = booleanPreferencesKey("appearance_enable_artwork_colors")
     val APPEARANCE_ENABLE_DYNAMIC_COLORS = booleanPreferencesKey("appearance_enable_dynamic_colors")
     val APPEARANCE_USE_ALTERNATIVE_BRANDING =
@@ -73,6 +75,15 @@ class SettingsRepository(val context: Context) {
     val debug = Debug()
 
     inner class Appearance {
+        val themeMode: Flow<ThemeMode> = dataStore.data
+            .map { preferences ->
+                ThemeMode.fromKey(preferences[SettingsKeys.APPEARANCE_THEME_MODE] ?: ThemeMode.SYSTEM.key)
+            }
+
+        suspend fun setThemeMode(mode: ThemeMode) = dataStore.edit { preferences ->
+            preferences[SettingsKeys.APPEARANCE_THEME_MODE] = mode.key
+        }
+
         val enableArtworkColors: Flow<Boolean> = dataStore.data
             .map { preferences ->
                 preferences[SettingsKeys.APPEARANCE_ENABLE_ARTWORK_COLORS] ?: true
