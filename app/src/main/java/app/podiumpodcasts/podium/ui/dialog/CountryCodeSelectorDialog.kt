@@ -68,6 +68,7 @@ fun CountryCodeSelectorDialog(
                 modifier = Modifier
                     .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
                     .fillMaxWidth(),
+                singleLine = true,
 
                 leadingIcon = {
                     Icon(Icons.Rounded.Search, stringResource(R.string.common_search))
