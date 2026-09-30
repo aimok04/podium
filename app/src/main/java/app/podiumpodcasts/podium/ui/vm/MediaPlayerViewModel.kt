@@ -98,7 +98,7 @@ class MediaPlayerViewModel : ViewModel() {
         val mediaItem = bundle.episode
             .createMediaItem(context)
 
-        mediaController?.setMediaItem(mediaItem, bundle.playState!!.state * 1000L)
+        mediaController?.setMediaItem(mediaItem, (bundle.playState?.state ?: 0) * 1000L)
         mediaController?.play()
     }
 
